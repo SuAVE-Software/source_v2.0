@@ -49,6 +49,8 @@
  ---------------------------------
 
  Prerequisites for installation:
+ 
+ -> cmake installed
    
  -> gfortran installed
 
@@ -73,47 +75,44 @@
 
  If you downloaded the compiled version you just need to insert the files on a 
  convenient path in order to be run. If you downloaded the source code, please compile
- it by the use of any FORTRAN compiler. See below an example of how to compile SuAVE source 
- with gfortran:
+ it by the use of any FORTRAN compiler and the MakeFile. 
+ 
+ ->> Enter the directory where you have downloaded the code
 
-      $ gfortran s_area.f90 -o s_area 
+     $ cd ~/PATH_TO_SRC/
+ 
+ ->> Edit makefile in order to proceed with the installation process. Edit INSTALL_PATH
+     content to update the PATH where you want to place the compiled source, and also
+     the FCFLAGS to adapt it to your needs.
+    
+     FCFLAGS = -O2 (DEFAULT)
+     INSTALL_PATH = /usr/local/suave (DEFAULT)
 
- The use of flags -O2 or -O3 is well accepted by this compiler and the code. It will be 
- helpful for extracting the best performance of SuAVE. 
+     (The use of flags -O2 or -O3 is well accepted by this compiler and the code. It will be 
+     helpful for extracting the best performance of SuAVE)
+     (SuAVE version 2.0.0 is also able to use OpenMP parallelization. To do so, the user has to 
+     insert the flag -fopenmp on FCFLAGS directive)
+ 
+ ->> Once with the makefile updated, run make!
+ 
+     $ make
+	
+     $ sudo make install
 
- SuAVE version 2.0.0 is also able to use OpenMP parallelization. To do so, the user has to 
- insert the following command line:
+ ->> Insert the following directives in the .bash_profile file:
 
-       $ gfortran s_area.f90 -o s_area -fopenmp
+     export SUAVE=/usr/local/suave
+     export PATH=$SUAVE:$PATH
 
- Once the user has compiled the source code or downloaded the compiled version of SuAVE Web
- Page, the code can be used. We suggest the following protocol to install the binaries and better
- take advantage of the SuAVE tools:
+ ->> Update the bash
 
- 1- Enter as super-user:
+     $ source .bash_profile
 
- 2- Create the program directory:
+     or
 
-    mkdir /usr/local/suave
+     $ source .bashrc
 
- 3- Move the programs:
-
-    sudo mv s_* /usr/local/suave
-
- 4- Insert the following directives in the .bash_profile file:
-
-    export SUAVE=/usr/local/suave
-    export PATH=$SUAVE:$PATH
-
- 5- Update the bash
-
-    source .bash_profile
-
-    or
-
-    source .bashrc
-
- 6- Have fun with your analysis
+ ->> Have fun with your analysis !
 
 
  USAGE:
