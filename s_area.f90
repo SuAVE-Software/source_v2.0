@@ -29,7 +29,7 @@ program ar_grid
   logical :: ex, bin, outer, p_grid, rmsd, l_coarse, begin, end, skip
   logical :: eval_skip, lipid, help, back
 
-  integer :: i, j, k, l, ierr, n_grid, frame, aux, bin_out, noi1, noi2
+  integer :: i, j, k, ierr, n_grid, frame, aux, bin_out, noi1, noi2
   integer :: n_index, n_lipid, num, num2, i_atom, bin_coarse, a, b
   integer :: fr_in, fr_end, n_skip, tot_frame
   integer :: start, finish, clock_rate, clock_max
@@ -37,7 +37,7 @@ program ar_grid
 
   real :: dist_x, dist_y, dist_z, s_soma, hour, minu, sec, noir, minv
   real :: x_max, x_min, y_max, y_min, dx, dy, dist, s_grid, al, peso
-  real :: s_area, la, lb, lc, r_fit, aux2, gridx, gridy, tempo, rough
+  real :: s_area, la, lb, lc, r_fit, rough
   real :: total_lines, lines, progress
   real, dimension(: , :), allocatable :: r_xpm1, r_xpm2
   
@@ -71,10 +71,17 @@ program ar_grid
   write(*, *) ""
   write(*, *) "             Santos, D. E. S.; Soares, T. A."
   write(*, *) ""
-  write(*, *) "Please cite SuAVE: A Tool for Analyzing Curvature-Dependent"
-  write(*, *) "Properties in Chemical Interfaces (2020) Denys E. S. Santos,"
-  write(*, *) "Frederico J. S. Pontes, Roberto D. Lins, Kaline Coutinho,"
-  write(*, *) "Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484."
+  write(*, *) "Please cite "
+  write(*, *)
+  write(*, *) "Santos, D. E. S.; Coutinho, K.; Soares, T. A. (2022) Surface "
+  write(*, *) "Assessment Grid Evaluation (SuAVE) for Every Surface Curvature"
+  write(*, *) "and Cavity Shape. Journal of Chemical Information and Modeling," 
+  write(*, *) "v. 62, p. 4690–4701"
+  write(*, *)
+  write(*, *) "Santos, D. E. S.; Pontes, J. F. S.; Lins, R. D.; Coutinho, K.; "
+  write(*, *) "Soares, T. A. (2020) SuAVE: A Tool for Analyzing Curvature-Dependent"
+  write(*, *) "Properties in Chemical Interfaces. Journal of Chemical Information "
+  write(*, *) "and Modeling, v. 60, p. 473-484."
 
 !
 ! pegando os arquivos de entrada =======================================
@@ -403,8 +410,6 @@ program ar_grid
      close(3)
 
   end if
-  
-2 format(a10)
   
   !=================definindo frames para inicio e fim========
   !=================definindo skip============================

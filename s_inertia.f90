@@ -34,23 +34,22 @@ program bend
   logical :: ex, bin, p_grid, rmsd, l_coarse, begin, end, skip
   logical :: eval_skip, help, back
 
-  integer :: i, j, ierr, n_grid, frame, aux, noi1, noi2
+  integer :: i, j, ierr, n_grid, frame, aux, noi1
   integer :: n_index, num, num2, i_atom, bin_coarse, a, b
-  integer :: fr_in, fr_end, n_skip, tot_frame, bini
+  integer :: fr_in, fr_end, n_skip, tot_frame
   integer :: start, finish, clock_rate, clock_max
-  integer, dimension(50000) :: in_num, in_num2
-  integer, dimension(200) :: hist
+  integer, dimension(50000) :: in_num
 
   double precision :: MI(3,3)
   double precision :: Q(3,3)
   double precision :: W(3), PCA(3), ORD(3) 
 
-  real :: dist_x, dist_y, dist_z, s_soma, hour, minu, sec, noir
-  real :: dist, s_grid, r_med1, r_med2, aux2, aver, aver2, averx, avery, averz
-  real :: s_area, s_area2, la, lb, lc, r_fit, al, rough
-  real :: cent_x, cent_y, cent_z, dph, dth, dz
+  real :: dist_z, hour, minu, sec, noir
+  real :: dist, s_grid, r_med1, averx, avery, averz
+  real :: r_fit, al, rough
+  real :: cent_x, cent_y, cent_z, dth, dz
   real :: total_lines, lines, progress
-  real :: minv, maxv, desv, graph
+  real :: minv, maxv
 
   character(len=30) :: coord,  ind, atom, ind2
   character(len=30), dimension(20) :: get
@@ -60,7 +59,7 @@ program bend
   type(vet1), dimension(500000) :: spher
   type(vet3), dimension(1001,1001) :: grid
   type(vet2), dimension(1001,1001) :: grid3
-  type(vet2) :: center, v1, v2, v3 
+  type(vet2) :: center
   
   write(*, *) "  .--.--.                   ,---,                      ,---,. "
   write(*, *) " /  /    '.                '  .' \            ,---.  ,'  .' | "
@@ -83,10 +82,17 @@ program bend
   write(*, *) ""
   write(*, *) "              Santos, D. E. S.; Soares, T. A."
   write(*, *) ""
-  write(*, *) "Please cite SuAVE: A Tool for Analyzing Curvature-Dependent"
-  write(*, *) "Properties in Chemical Interfaces (2020) Denys E. S. Santos,"
-  write(*, *) "Frederico J. S. Pontes, Roberto D. Lins, Kaline Coutinho,"
-  write(*, *) "Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484."
+  write(*, *) "Please cite "
+  write(*, *)
+  write(*, *) "Santos, D. E. S.; Coutinho, K.; Soares, T. A. (2022) Surface "
+  write(*, *) "Assessment Grid Evaluation (SuAVE) for Every Surface Curvature"
+  write(*, *) "and Cavity Shape. Journal of Chemical Information and Modeling,"
+  write(*, *) "v. 62, p. 4690–4701"
+  write(*, *)
+  write(*, *) "Santos, D. E. S.; Pontes, J. F. S.; Lins, R. D.; Coutinho, K.; "
+  write(*, *) "Soares, T. A. (2020) SuAVE: A Tool for Analyzing Curvature-Dependent"
+  write(*, *) "Properties in Chemical Interfaces. Journal of Chemical Information "
+  write(*, *) "and Modeling, v. 60, p. 473-484."
 
 !
 ! pegando os arquivos de entrada
@@ -310,8 +316,6 @@ program bend
   ! Fim da leitura do index=====================
 
   close(2)
-  
-2 format(a10)
   
  !=================definindo frames para inicio e fim========
  !=================definindo skip============================

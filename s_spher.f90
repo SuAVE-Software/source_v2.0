@@ -77,10 +77,17 @@ program esferico
   write(*, *) ""
   write(*, *) "             Santos, D. E. S.; Soares, T. A."
   write(*, *) ""
-  write(*, *) "Please cite SuAVE: A Tool for Analyzing Curvature-Dependent"
-  write(*, *) "Properties in Chemical Interfaces (2020) Denys E. S. Santos,"
-  write(*, *) "Frederico J. S. Pontes, Roberto D. Lins, Kaline Coutinho,"
-  write(*, *) "Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484."
+  write(*, *) "Please cite "
+  write(*, *)
+  write(*, *) "Santos, D. E. S.; Coutinho, K.; Soares, T. A. (2022) Surface "
+  write(*, *) "Assessment Grid Evaluation (SuAVE) for Every Surface Curvature"
+  write(*, *) "and Cavity Shape. Journal of Chemical Information and Modeling,"
+  write(*, *) "v. 62, p. 4690–4701"
+  write(*, *)
+  write(*, *) "Santos, D. E. S.; Pontes, J. F. S.; Lins, R. D.; Coutinho, K.; "
+  write(*, *) "Soares, T. A. (2020) SuAVE: A Tool for Analyzing Curvature-Dependent"
+  write(*, *) "Properties in Chemical Interfaces. Journal of Chemical Information "
+  write(*, *) "and Modeling, v. 60, p. 473-484."
   
 !
 ! pegando os arquivos de entrada
@@ -390,8 +397,6 @@ program esferico
   ! Fim da leitura do ind2=======================
 
   close(3)
-
-2 format(a10)
 
   
  !=================definindo frames para inicio e fim========
