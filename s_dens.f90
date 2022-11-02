@@ -35,9 +35,9 @@ program densidade
   integer :: fr_in, fr_end, n_skip, tot_frame
   integer, dimension(500000) :: in_num, in_num2, in_dens
 
-  real :: dist_x, dist_y, dist_z, del, aux2, hour, minu, sec, s_grid, noir, al
-  real :: dx, dy, dist, area, r_fit, gridx, gz, n_inside, rough
-  real :: z_max, z_min, x_max, x_min, y_max, y_min, gridy, maxv, minv
+  real :: dist_z, del, hour, minu, sec, s_grid, noir, al
+  real :: dx, dy, dist, r_fit, gz, n_inside, rough
+  real :: z_max, z_min, x_max, x_min, y_max, y_min, maxv, minv
   real :: total_lines, lines, progress
   real, dimension(1000) :: hist
   real, dimension(:, :), allocatable :: r_xpm
@@ -75,10 +75,17 @@ program densidade
   write(*, *) ""
   write(*, *) "             Santos, D. E. S.; Soares, T. A."
   write(*, *) ""
-  write(*, *) "Please cite SuAVE: A Tool for Analyzing Curvature-Dependent"
-  write(*, *) "Properties in Chemical Interfaces (2020) Denys E. S. Santos,"
-  write(*, *) "Frederico J. S. Pontes, Roberto D. Lins, Kaline Coutinho,"
-  write(*, *) "Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484."
+  write(*, *) "Please cite "
+  write(*, *)
+  write(*, *) "Santos, D. E. S.; Coutinho, K.; Soares, T. A. (2022) Surface "
+  write(*, *) "Assessment Grid Evaluation (SuAVE) for Every Surface Curvature"
+  write(*, *) "and Cavity Shape. Journal of Chemical Information and Modeling,"
+  write(*, *) "v. 62, p. 4690–4701"
+  write(*, *)
+  write(*, *) "Santos, D. E. S.; Pontes, J. F. S.; Lins, R. D.; Coutinho, K.; "
+  write(*, *) "Soares, T. A. (2020) SuAVE: A Tool for Analyzing Curvature-Dependent"
+  write(*, *) "Properties in Chemical Interfaces. Journal of Chemical Information "
+  write(*, *) "and Modeling, v. 60, p. 473-484."
 
   !
   ! pegando os arquivos de entrada
@@ -489,9 +496,6 @@ program densidade
   ! Fim da leitura do index3
   
   close(4)
-
-  
-6 format(a10)
 
   if (.not.slices) then
           

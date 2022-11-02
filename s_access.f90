@@ -31,20 +31,22 @@ program esferico
   
   use spherical
 
-  logical :: ex, bin, p_grid, rmsd, l_coarse, begin, end, skip
-  logical :: eval_skip, help, back
+  logical :: ex, bin, p_grid, l_coarse, begin, end, skip
+  logical :: eval_skip, help, check, fora, consta, temp, back
 
-  integer :: i, j, ierr, n_grid, frame, aux, noi1
-  integer :: n_index, num, i_atom, bin_coarse, a, b
-  integer :: fr_in, fr_end, n_skip
+  integer :: i, j, ierr, n_grid, frame, aux, n_atempt
+  integer :: n_index, num, num2, i_atom, bin_coarse, a, b
+  integer :: fr_in, fr_end, n_skip, atempt, inner, k
   integer :: start, finish, clock_rate, clock_max
-  integer, dimension(50000) :: in_num
+  integer, dimension(500000) :: in_num
 
-  real :: dist_z, hour, minu, sec, noir
-  real :: dist, s_grid, r_med1, r_fit, al, rough
-  real :: cent_x, cent_y, cent_z, dph, dth
-
-  character(len=30) :: coord,  ind, atom
+  real :: dist_x, dist_y, dist_z, s_soma, hour, minu, sec
+  real :: s_grid, r_max, dist, aux2, vdw(500000)
+  real :: s_area, la, lb, lc, r_fit, al, const, rough, c_angle
+  real :: cent_x, cent_y, cent_z, dph, dth, s_vol
+  real :: total_lines, lines, progress
+  
+  character(len=30) :: coord,  ind, atom, param
   character(len=30), dimension(20) :: get
 
   type(vet3), dimension(50000) :: store, coarse
@@ -52,8 +54,9 @@ program esferico
   type(vet1), dimension(500000) :: spher
   type(vet3), dimension(1001,1001) :: grid
   type(vet2), dimension(1001,1001) :: grid3
-  type(vet2) :: center 
-  
+  type(vet2) :: center, pontoc 
+  type(vet3) :: ponto
+
   write(*, *) "  .--.--.                   ,---,                      ,---,. "
   write(*, *) " /  /    '.                '  .' \            ,---.  ,'  .' | "
   write(*, *) "|  :  /`. /          ,--, /  ;    '.         /__./|,---.'   | "
@@ -69,7 +72,7 @@ program esferico
   write(*, *) "                                                   `----'     "
   write(*, *) ""
   write(*, *) ""  
-  write(*, *) "                       ** s_gridsph **"
+  write(*, *) "                       ** s_access **"
   write(*, *) ""
   write(*, *) "                   ** VERSION ", version, " **"
   write(*, *) ""
@@ -86,7 +89,6 @@ program esferico
   write(*, *) "Soares, T. A. (2020) SuAVE: A Tool for Analyzing Curvature-Dependent"
   write(*, *) "Properties in Chemical Interfaces. Journal of Chemical Information "
   write(*, *) "and Modeling, v. 60, p. 473-484."
-
   
 !
 ! pegando os arquivos de entrada
@@ -97,12 +99,14 @@ program esferico
   p_grid = .false.
   coord = 'miss'
   ind = 'miss'
-  rmsd = .false.
+  param = 'miss'
   l_coarse = .false.
   begin = .false.
   end = .false.
   skip = .false.
   help = .false.
+  temp = .false.
+  consta = .false.
   rough = 1.0
   
   do i=1, 20
@@ -119,7 +123,13 @@ program esferico
 
      end if
 
-     if (get(i)=='-ind')then
+     if (get(i)=='-param')then
+
+        param = get(i+1)
+
+     end if
+
+     if (get(i)=='-sys')then
 
         ind = get(i+1)
 
@@ -130,18 +140,12 @@ program esferico
         bin= .true.
         read(get(i+1), *, iostat=ierr) n_grid
         call erro(ierr, " BIN ")
-
+        
      end if
 
      if (get(i)=='-grid')then
 
         p_grid = .true.
-
-     end if
-
-     if (get(i)=='-rmsd')then
-
-        rmsd = .true.
 
      end if
      
@@ -170,7 +174,7 @@ program esferico
      if (get(i)=='-skip')then
 
 	skip = .true.
-        read(get(i+1), *, iostat=ierr)n_skip
+        read(get(i+1), *, iostat=ierr) n_skip
         call erro(ierr, " SKIP")
 
      end if
@@ -181,66 +185,82 @@ program esferico
         call erro(ierr, "REDUC")
 
      end if
-     
+
      if (get(i)=='-help')then
 
         help = .true.
 
      end if
 
+     if (get(i)=='-atempt')then
+
+        temp = .true.
+        read(get(i+1), *, iostat=ierr) n_atempt
+        call erro(ierr, "TEMPT")
+
+     end if
+
+     if (get(i)=='-const')then
+
+        consta = .true.
+        read(get(i+1), *, iostat=ierr) const
+        call erro(ierr, "CONST")
+
+     end if
+
   end do
-  
-  !HELP begins ====================================================================
+
+  !HELP begins =================================================================
   if (help) then
 
-       write(*, *) ""
-       write(*, *) ""
-       write(*, *) "s_gridsph builds a grid per frame throughout a trajectory file"
-       write(*, *) "of compact surfaces."
-       write(*, *) "Its output is useful to verify how accurate is the fitting of"
-       write(*, *) "the calculated grid on the chemical surface.  "
-       write(*, *) ""
-       write(*, *) "Usage: s_gridsph -in file.pdb -ind file.ndx "
-       write(*, *) ""
-       write(*, *) "file.pdb ---- atomic coordinates in PDB format"
-       write(*, *) "file.ndx ---- index file containing user-selected atoms used"
-       write(*, *) "to fit the grid points to the chemical surface."
-       write(*, *) ""
-       write(*, *) "Options:"
-       write(*, *) ""
-       write(*, *) "-bin             defines the number of rectangular partition "
-       write(*, *) "bins along the phi- and psi-angles"
-       write(*, *) ""
-       write(*, *) "-grid            generates a PDB file containing the grid"
-       write(*, *) "points used in the fitting for the last frame in the "
-       write(*, *) "trajectory file."
-       write(*, *) ""
-       write(*, *) "-rmsd            calculates the RMSD between the fitted"
-       write(*, *) "grid and the selected atoms in the index files. This"
-       write(*, *) "estimates how precisely is the grid surface fitted to the"
-       write(*, *) "chemical surface throughout the trajectory file."
-       write(*, *) ""
-       write(*, *) "-coarse          generates a coarse grid over the surface"
-       write(*, *) "index atoms from which a finer grid will be generated. This"
-       write(*, *) "is recommended for surfaces defined by atoms which greatly"
-       write(*, *) "fluctuate throughout the trajectory. "
-       write(*, *) ""
-       write(*, *) "-begin           first frame to use in the calculations"
-       write(*, *) ""
-       write(*, *) "-end             last frame to use in the calculations"
-       write(*, *) ""
-       write(*, *) "-skip            number of trajectory frames to be skipped"
-       write(*, *) "during the analysis "
-       write(*, *)
-       write(*, *) "-rough           percentage of the original surface roughness"
-       write(*, *) "the user wants to keep (1.0 by default, meaning 100%)"
-       write(*, *) ""
-       write(*, *) "-help            prints HELP information and quits"
-       stop
+     write(*, *) ""
+     write(*, *) ""
+     write(*, *) "s_access calculates accessible volumes within structures of "
+     write(*, *) "interest using Monte Carlo integration. "
+     write(*, *) ""
+     write(*, *) "Usage: s_access -in file.pdb  -sys sys.ndx "
+     write(*, *) "                -param par.dat" 
+     write(*, *) ""
+     write(*, *) "file.pdb ---- atomic coordinates in PDB format"
+     Write(*, *) "sys.ndx  ---- index file containing the atoms composing the"
+     Write(*, *) "system of interest"
+     write(*, *) "par.dat  ---- file containing van der Waals sigma parameter"
+     write(*, *) "[nm] for each atom being considered in sys.ndx file"
+     write(*, *) ""
+     write(*, *) "Options:"
+     write(*, *) ""
+     write(*, *) "-bin             defines the number of rectangular partition "
+     write(*, *) "bins along the phi- and psi-angles"
+     write(*, *) ""
+     write(*, *) "-grid            generates a PDB file containing the grid"
+     write(*, *) "points used in the fitting for the last frame in the "
+     write(*, *) "trajectory file."
+     write(*, *) ""
+     write(*, *) "-coarse          generates a coarse grid over the surface"
+     write(*, *) "index atoms from which a finer grid will be generated. This"
+     write(*, *) "is recommended for surfaces defined by atoms which greatly"
+     write(*, *) "fluctuate throughout the trajectory. "
+     write(*, *) ""
+     write(*, *) "-begin           first frame to use in the calculations"
+     write(*, *) ""
+     write(*, *) "-end             last frame to use in the calculations"
+     write(*, *) ""
+     write(*, *) "-skip            number of trajectory frames to be skipped"
+     write(*, *) "during the analysis "
+     write(*, *) ""
+     write(*, *) "-atempt          defines number of atempts to calculate volume"
+     write(*, *) ""
+     write(*, *) "-const           defines the constant multiplying the radius"
+     write(*, *) ""
+     write(*, *) "-rough           percentage of the original surface roughness"
+     write(*, *) "the user wants to keep (1.0 by default, meaning 100%)"
+     write(*, *) ""
+     write(*, *) "-help            prints HELP information and quits"
+     stop
 
   end if
-  !HELP ends ====================================================================
-
+  !HELP ends ==================================================================
+  
   if (coord=='miss')then
 
      write(*, *)
@@ -259,6 +279,32 @@ program esferico
      
   end if
   
+  if (param=='miss')then
+
+     write(*, *)
+     write(*, *) 'Van der Waals parameters are mising'
+     write(*, *)
+     stop
+
+  end if
+
+  if (.not.temp)then
+    
+     write(*, *)
+     write(*, *) 'Using ATEMPT_DEF = 1000000'
+     n_atempt = 1000000
+
+  end if
+
+  if (.not.consta)then
+
+     write(*, *)
+     write(*, *) 'Using CONST_DEF = 1.0'
+     const = 1.0
+
+  end if
+
+
  !==Lendo os arquivos de index=========================
 
   open(2, file=ind, status='old', iostat=ierr)
@@ -271,7 +317,18 @@ program esferico
      stop
      
   endif
-  
+
+  open(3, file=param, status='old', iostat=ierr)
+
+  if(ierr /= 0) then
+
+     write(*, *)
+     write(*, *) 'Unable to open file ', param
+     write(*, *)
+     stop
+
+  end if
+
   ! Inicio da leitura do index1====================
   
   n_index = 1
@@ -310,6 +367,45 @@ program esferico
   ! Fim da leitura do index=====================
 
   close(2)
+
+  !leitura dos parametros de van der Waals ===============
+
+  ierr = 0
+  n_index = 1
+
+  do while (ierr==0)
+
+     read(3, *, iostat=ierr) aux2
+
+     if (ierr==0) then
+
+        vdw(n_index) = aux2*10
+        n_index = n_index + 1
+
+     end if
+
+  end do
+
+  if(ierr>0) then
+
+     write(*, *)
+     write(*, *) 'Problem by reading ', param
+     write(*, *)
+     stop
+
+  end if
+
+  do i=n_index, 500000
+
+     vdw(i) = -1
+
+  end do
+
+  write(*, *)
+  write(*, *) param, 'input file is OK'
+
+  !fim da leitura ========================================
+
     
  !=================definindo frames para inicio e fim========
  !=================definindo skip============================
@@ -377,58 +473,35 @@ program esferico
   
   rewind(1) ! reinicializando o arquivo 1
   
-  if (rmsd)then
-
-     inquire(file='rmsd.xvg', exist=ex)
-
-     if (ex) then
-
-        call execute_command_line("mv rmsd.xvg rmsd_p.xvg")
-        back = .true.
-
-     end if
-
-     open(3, file='rmsd.xvg', status='new', iostat=ierr)
-
-     if(ierr /= 0) then
-
-        write(*, *)
-        write(*, *) 'Unable to open file rmsd.xvg'
-        write(*, *)
-        stop
-
-     endif
-
-     write(3, '(a7, a5)') "#SuAVE ", version
-     write(3, '(a14)') '#Command Line:'
-     write(3, '(a12)', advance='no') '#s_gridsph  '
-     write(3, *) (trim(get(i)),"  ", i=1, 20)
-     write(3, *) '@    title "RMSD X Frame"'
-     write(3, *) '@    xaxis  label "#Frame"'
-     write(3, *) '@    yaxis  label "RMSD [nm]"'
-
-  end if
-
- inquire(file='grid.pdb', exist=ex)
-
+  inquire(file='volume.xvg', exist=ex)
+  
   if (ex) then
-
-     call execute_command_line("mv grid.pdb grid_p.pdb")
+     
+     call execute_command_line("mv volume.xvg volume_p.xvg")
      back = .true.
 
   end if
 
-  open(4, file='grid.pdb', status='new', iostat=ierr)
+  open(2, file='volume.xvg', status='new', iostat=ierr)
 
   if(ierr /= 0) then
 
      write(*, *)
-     write(*, *) 'Unable to open file grid.pdb'
+     write(*, *) 'Unable to open file volume.xvg'
      write(*, *)
      stop
 
   endif
 
+  write(2, '(a7, a5)') "#SuAVE ", version
+  write(2, '(a14)') '#Command Line:'
+  write(2, '(a11)', advance='no') '#s_access  '
+  write(2, *) (trim(get(i)),"  ", i=1, 20)
+  write(2, *) '@    title " Volume X Frame"'
+  write(2, *) '@    xaxis  label "#Frame"'
+  write(2, *) '@    yaxis  label "Volume [nm\S3\N]"'
+  write(2, *) '#    total volume     accessible volume'
+  
   call system_clock(start, clock_rate, clock_max)
 
 ! Leitura do arquivo .pdb
@@ -437,6 +510,7 @@ program esferico
   n_index = 1
   ierr = 0
   num = 1
+  num2 = 1
   cent_x = 0
   cent_y = 0
   cent_z = 0
@@ -445,7 +519,7 @@ program esferico
   
   write(*, *)
   write(*, '(a17)', advance='no') ' Progress : 00.0%'
-
+  
   do while (ierr >= 0)
      
      read(1, 12, iostat=ierr) atom, buff%n_atom, buff%atom, &
@@ -457,7 +531,7 @@ program esferico
      lines = lines + 1
      
      if (atom.eq.'ATOM  ') then
-        
+
         if(ierr > 0) then
 
            write(*, *)
@@ -493,7 +567,7 @@ program esferico
            if ((frame>fr_in-1).and.(frame<fr_end+1).and.(eval_skip)) then
 
               num = 1
-              r_med1 = 0
+              r_max = 0
               
               ! transformando em Coordenadas Esfericas ======================================================
               
@@ -518,17 +592,15 @@ program esferico
                     
                  end if
                  
-                 r_med1 = (r_med1*(num-1) + store(num)%rho)/(num)
+                 r_max = max(store(num)%rho, r_max)
                  
-                 num = num + 1
-              
+                 num = num + 1                    
+                 
               end do
-              
+                    
               !! A partir desse ponto as coordenadas são esféricas e estão com o centro transladado para
               !! o centro da micela. Logo, quando retornarmos para as coordenadas cartesianas teremos que
               !! transladar novamente 
-              
-              noi1 = num - 1
               
               if (l_coarse) then
                  
@@ -537,7 +609,7 @@ program esferico
                  dph = (2*pi)/(2*(bin_coarse - int(bin_coarse/2)))
                  dth = (2*pi)/bin_coarse
 
-                 call param_esf(r_med1, num, r_fit, al, rough)
+                 call param_esf(r_max, num, r_fit, al, rough)
 
                  !$OMP parallel do private(s_grid, dist, j, k, aux)
                  do i=1, (bin_coarse - int(bin_coarse/2)) + 1
@@ -560,8 +632,8 @@ program esferico
                           
                           if (dist/al<r_fit)then
                              
-                             s_grid = s_grid + exp(-dist*dist/pi)
-                             coarse(aux)%rho = coarse(aux)%rho + exp(-dist*dist/pi)*store(k)%rho
+                             s_grid = s_grid + exp(-dist*dist/pi)*exp(store(k)%rho)
+                             coarse(aux)%rho = coarse(aux)%rho + exp(-dist*dist/pi)*exp(store(k)%rho)*store(k)%rho
                              
                           end if
                           
@@ -575,19 +647,19 @@ program esferico
                  !$OMP end parallel do
                  
                  num = (bin_coarse + 1)*(bin_coarse - int(bin_coarse/2) + 1) + 1
-                 
+                                  
               else
                  
                  coarse = store
-                 
+                                  
               end if
               
               ! estruturação do prmeiro grid de alta resolução========================
               
               dph = (2*pi)/(2*(n_grid - int(n_grid/2)))
               dth = (2*pi)/n_grid
-              
-              call param_esf(r_med1, num, r_fit, al, rough)
+
+              call param_esf(r_max, num, r_fit, al, rough)
 
               !$OMP parallel do private(s_grid, dist, j, k)
               do i=1, (n_grid - int(n_grid/2)) + 1
@@ -609,20 +681,20 @@ program esferico
                        
                        if (dist/al<r_fit)then
                           
-                          s_grid = s_grid + exp(-dist*dist/pi)
-                          grid(i,j)%rho = grid(i,j)%rho + exp(-dist*dist/pi)*coarse(k)%rho
+                          s_grid = s_grid + exp(-dist*dist/pi)*exp(coarse(k)%rho)
+                          grid(i,j)%rho = grid(i,j)%rho + exp(-dist*dist/pi)*exp(coarse(k)%rho)*coarse(k)%rho
                           
                        end if
                        
                     end do
                     
                     grid(i,j)%rho = grid(i,j)%rho/s_grid
-
+                    
                  end do
                  
               end do
               !$OMP end parallel do
-              
+
               ! Fim da estruturação========================================
 
               !$OMP parallel do private(j)
@@ -633,62 +705,180 @@ program esferico
                     grid3(i,j)%x = grid(i,j)%rho*sin(grid(i,j)%phi)*cos(grid(i,j)%theta) + cent_x
                     grid3(i,j)%y = grid(i,j)%rho*sin(grid(i,j)%phi)*sin(grid(i,j)%theta) + cent_y
                     grid3(i,j)%z = grid(i,j)%rho*cos(grid(i,j)%phi) + cent_z
-
+                    
                  end do
                  
               end do
               !$OMP end parallel do
               
-              ! Calculando o RMSD========================================
-              if (rmsd)then
+              ! Calculando volume do grid==============================
+              
+              s_area = 0
+              s_vol  = 0
+              
+              do i=2, (n_grid - int(n_grid/2))+1
                  
-                 noir = 0
-                 
-                 do i=1, noi1
+                 do j=2, n_grid+1
                     
-                    a = nint((store(i)%phi)/dph) + 1
-                    b = nint((store(i)%theta)/dth) + 1
-                    dist_z = store(i)%rho-grid(a,b)%rho
-                    noir = noir + dist_z*dist_z/noi1
+                    dist_x = abs(grid3(i-1,j-1)%x - grid3(i-1,j)%x)
+                    dist_y = abs(grid3(i-1,j-1)%y - grid3(i-1,j)%y)
+                    dist_z = abs(grid3(i-1,j-1)%z - grid3(i-1,j)%z)
                     
-                 end do
-                                  
-                 noir = sqrt(noir)
-                 
-                 write(3, *) noir/10
-                 
-              end if
-              ! Fim do calculo do RMSD===================================
-
-              ! escreve cada frame da trajetoria do grid=================
-
-              write(4, '(a26)') 'REMARK Generated by s_grid'
-              write(4, '(a34)') 'TITLE     Rectangular Regular GRID'
-              write(4, '(a22)') 'REMARK trajectory file'
-              write(4, '(a6, i4)') 'MODEL ', frame
-
-              do i=1, (n_grid - int(n_grid/2))+1
-                 
-                 do j=1, n_grid+1
+                    la = sqrt(dist_x**2 + dist_y**2 + dist_z**2)
                     
-                    write(4, 12, iostat=ierr) 'ATOM  ', (i-1)*(n_grid+1) + j, '  DOT', &
-                         '  DOT',' ', 1,'    ', grid3(i,j)%x, &
-                         grid3(i,j)%y, grid3(i,j)%z
+                    dist_x = abs(grid3(i-1,j-1)%x - grid3(i,j-1)%x)
+                    dist_y = abs(grid3(i-1,j-1)%y - grid3(i,j-1)%y)
+                    dist_z = abs(grid3(i-1,j-1)%z - grid3(i,j-1)%z)
+                    
+                    lb = sqrt(dist_x**2 + dist_y**2 + dist_z**2)
+                    
+                    dist_x = abs(grid3(i-1,j)%x - grid3(i,j-1)%x)
+                    dist_y = abs(grid3(i-1,j)%y - grid3(i,j-1)%y)
+                    dist_z = abs(grid3(i-1,j)%z - grid3(i,j-1)%z)
+                    
+                    lc = sqrt(dist_x**2 + dist_y**2 + dist_z**2)
+                    
+                    s_soma = (la + lb + lc)/2
+
+                    aux2 = sqrt(s_soma*abs(s_soma-la)*abs(s_soma-lb)*abs(s_soma-lc))
+                    c_angle = ang(grid3(i-1,j-1), grid3(i-1,j), grid3(i,j-1), (i-1-0.5)*dph, (j-1-0.5)*dth)
+                    s_area = s_area + aux2
+
+                    s_vol = s_vol + c_angle*aux2*grid(i-1,j-1)%rho/3
+                    
+                    ! segundo triângulo
+                    
+                    dist_x = abs(grid3(i-1,j)%x - grid3(i,j)%x)
+                    dist_y = abs(grid3(i-1,j)%y - grid3(i,j)%y)
+                    dist_z = abs(grid3(i-1,j)%z - grid3(i,j)%z)
+                    
+                    la = sqrt(dist_x**2 + dist_y**2 + dist_z**2)
+                    
+                    dist_x = abs(grid3(i,j-1)%x - grid3(i,j)%x)
+                    dist_y = abs(grid3(i,j-1)%y - grid3(i,j)%y)
+                    dist_z = abs(grid3(i,j-1)%z - grid3(i,j)%z)
+                    
+                    lb = sqrt(dist_x**2 + dist_y**2 + dist_z**2)
+                    
+                    s_soma = (la + lb + lc)/2
+              
+                    aux2 = sqrt(s_soma*abs(s_soma-la)*abs(s_soma-lb)*abs(s_soma-lc))
+                    c_angle = ang(grid3(i-1,j), grid3(i,j-1), grid3(i,j), (i-1-0.5)*dph, (j-1-0.5)*dth)
+                    s_area = s_area + aux2
+
+                    s_vol = s_vol + c_angle*aux2*grid(i,j)%rho/3
                     
                  end do
                  
               end do
-              
-              write(4, '(a3)') 'TER'
-              write(4, '(a6)') 'ENDMDL'
-              
-           !fim da escrita da trajetoria======================================
-              
+ 
+              call srand(int(1000*start/clock_rate))
+
+              !========== VOLUME DO PORO =================================
+
+              atempt = 0
+              inner = 0
+
+              do i=1, n_atempt
+
+                 fora = .true.
+
+                 do while(fora)
+                    
+                    pontoc%x = 1.5*r_max*(2*rand() - 1)
+                    pontoc%y = 1.5*r_max*(2*rand() - 1)
+                    pontoc%z = 1.5*r_max*(2*rand() - 1)
+
+                    !transformando em esfericas ===================================
+                    ponto%rho = sqrt((pontoc%x)**2 + (pontoc%y)**2 + (pontoc%z)**2)
+                    ponto%phi = acos((pontoc%z)/ponto%rho)
+                    
+                    if ((pontoc%y)==0)then
+                       
+                       ponto%theta = 0.000
+                       
+                    else
+                       
+                       ponto%theta = acos((pontoc%x)/sqrt((pontoc%x)**2 + (pontoc%y)**2))
+                       
+                       if ((pontoc%y)<=0)then
+                          
+                          ponto%theta = 2*pi - ponto%theta
+                          
+                       end if
+                       
+                    end if
+                    !transformando em esfericas ===================================
+                    
+                    a = nint(ponto%phi/dph) + 1
+                    b = nint(ponto%theta/dth) + 1
+                    
+                    if (ponto%rho<grid(a,b)%rho*const)then
+
+                       fora = .false.
+
+                    else 
+
+                       fora = .true.
+
+                    end if
+
+                 end do
+
+                 j = 1
+                 check = .false.
+
+                 do while((.not.check).and.(j<num))
+
+                    dist_x = pontoc%x - (spher(j)%x - cent_x)
+                    dist_y = pontoc%y - (spher(j)%y - cent_y)
+                    dist_z = pontoc%z - (spher(j)%z - cent_z)
+                 
+                    dist = dist_x**2 + dist_y**2 + dist_z**2
+
+                    if (dist<=(0.57*vdw(j))**2) then 
+                       
+                       check = .true.
+
+                    else
+
+                       check = .false.
+
+                    end if
+
+                    j = j + 1
+
+                 end do
+                 
+                 if (.not.check) then
+
+                    atempt = atempt + 1
+                    inner = inner + 1
+
+!                    write(*, 12) 'ATOM  ', inner, '  DOT', &
+!                         '  DOT',' ', 1,'    ', pontoc%x + cent_x, &
+!                         pontoc%y + cent_y, pontoc%z + cent_z
+
+                 else
+
+                    atempt = atempt + 1
+
+                 end if
+
+              end do
+
+              write(2, *)  s_vol*(const**3)/1000, s_vol*(const**3)*inner/atempt/1000
+
+              !========== VOLUME DO PORO =================================
+
+              ! Fim do calculo ==========================================
+                            
            end if !======((frame<fr_in-1).and.(frame>fr_end+1)) 
               
            n_index = 1
            i_atom = 0
            num = 1
+           num2 = 1
            center%x = cent_x
            center%y = cent_y
            center%z = cent_z
@@ -714,7 +904,7 @@ program esferico
         write(*,'(1a1, a12, f5.1, a1, $)') char(13), ' Progress : ', progress*100, '%' 
         progress = progress + 0.01
         
-     end if     
+     end if
      
   end do
   
@@ -723,101 +913,62 @@ program esferico
   ! Fim da leitura do arquivo .pdb
 
   close(1)
-
-  if (rmsd)then
-     
-     close(3)
-
-  end if
-  
+  close(2)
   close(4)
+  close(5)
 
- ! desenho dos pontos usados no ajuste
-  
-  inquire(file='adjust.pdb', exist=ex)
-  
-  if (ex) then
-     
-     call execute_command_line("mv adjust.pdb adjust_p.pdb")
-     back = .true.
-     
-  end if
-  
-  open(3, file='adjust.pdb', status='new', iostat=ierr)
-  
-  if(ierr /= 0) then
+  if (p_grid)then
 
-     write(*, *)
-     write(*, *) 'Unable to open file ajuste.pdb'
-     write(*, *)
-     stop
+     inquire(file='grid1.pdb', exist=ex)
 
-  end if
-
-  write(3, *) 'TITLE     Rectangular Regular GRID'
-  write(3, *) 'REMARK    THIS IS A SIMULATION BOX'
-  write(3, *) 'MODEL        1'
-
-  do i=1, noi1
-     
-     write(3, 12, iostat=ierr) 'ATOM  ', i, '  DOT', &
-          '  DOT',' ', 1,'    ', spher(i)%x, &
-          spher(i)%y, spher(i)%z
-
-  end do
-
-  close(3)
-  
-  if (l_coarse) then
-     
-     inquire(file='coarse.pdb', exist=ex)
-     
      if (ex) then
-        
-        call execute_command_line("mv coarse.pdb coarse_p.pdb")
+
+        call execute_command_line("mv grid1.pdb grid1_p.pdb")
         back = .true.
-        
+
      end if
-     
-     open(3, file='coarse.pdb', status='new', iostat=ierr)
-     
+
+     open(3, file='grid1.pdb', status='new', iostat=ierr)
+
      if(ierr /= 0) then
-        
+
         write(*, *)
-        write(*, *) 'Unable to open file coarse.pdb'
+        write(*, *) 'Unable to open file grid1.pdb'
         write(*, *)
         stop
-        
+
      end if
 
-     
      write(3, *) 'TITLE     Rectangular Regular GRID'
      write(3, *) 'REMARK    THIS IS A SIMULATION BOX'
      write(3, *) 'MODEL        1'
-     
-     do i=1, (bin_coarse - int(bin_coarse/2)+1)*(bin_coarse+1)
 
-        buff%x = coarse(i)%rho*sin(coarse(i)%phi)*cos(coarse(i)%theta) + center%x
-        buff%y = coarse(i)%rho*sin(coarse(i)%phi)*sin(coarse(i)%theta) + center%y
-        buff%z = coarse(i)%rho*cos(coarse(i)%phi) + center%z
-        
-        write(3, 12, iostat=ierr) 'ATOM  ', i, '  DOT', &
-             '  DOT',' ', 1,'    ', buff%x, &
-             buff%y, buff%z
+     do i=1, (n_grid - int(n_grid/2))+1
+
+        do j=1, n_grid+1
+
+           grid3(i,j)%x = grid(i,j)%rho*sin(grid(i,j)%phi)*cos(grid(i,j)%theta) + center%x
+           grid3(i,j)%y = grid(i,j)%rho*sin(grid(i,j)%phi)*sin(grid(i,j)%theta) + center%y
+           grid3(i,j)%z = grid(i,j)%rho*cos(grid(i,j)%phi) + center%z
+
+           write(3, 12, iostat=ierr) 'ATOM  ', (i-1)*(n_grid +1) + j, '  DOT', &
+                '  DOT',' ', 1,'    ', grid3(i,j)%x, &
+                grid3(i,j)%y, grid3(i,j)%z
+
+        end do
 
      end do
 
+     close(3)
+     !first grid created
+    
   end if
-  
-! Fim. Arquivo escrito
-
-  close(3)
 
   write(*, *)
   write(*, *) 
   write(*, *) "Finished"
   write(*, *)
-  if (back) write(*, '(a31)') ' Previous files were backed up!'  
+  if (back) write(*, '(a31)') ' Previous files were backed up!'
   
   hour = real(finish-start)/(3600*real(clock_rate))
   minu = (hour - int(hour))*60
@@ -852,6 +1003,55 @@ subroutine erro(i, name)
 
 end subroutine erro
 
+real function ang(p1, p2, p3, phi, theta)
+
+  use spherical
+
+  type(vet2), intent(in) :: p1, p2, p3
+  type(vet2) :: v1, v2, v3
+
+  real :: la, phi, theta
+
+  v1%x = p2%x-p1%x
+  v1%y = p2%y-p1%y
+  v1%z = p2%z-p1%z
+  
+  v2%x = p3%x-p2%x
+  v2%y = p3%y-p2%y
+  v2%z = p3%z-p2%z
+  
+  v3%x = - v2%y*v1%z + v2%z*v1%y
+  v3%y = - v2%z*v1%x + v2%x*v1%z
+  v3%z = - v2%x*v1%y + v2%y*v1%x
+  
+  !reutilizando a variável v1 para facilitar o cálculo ====== 
+  
+  v1%x = sin(phi)*cos(theta)
+  v1%y = sin(phi)*sin(theta)
+  v1%z = cos(phi)
+  
+  !========================================================== 
+
+  if (v3%x**2 + v3%y**2 + v3%z**2<0.000001) then
+
+     !serve para os casos das extremidades de phi, onde a área
+     !do triangulo é nula. Neste caso não importa o ângulo.
+     !Por isso utilizamos o valor 1, pois a área já é nula
+
+     ang = 1
+
+  else
+
+     la = v1%x*v3%x + v1%y*v3%y + v1%z*v3%z
+     la = la/sqrt(v3%x**2 + v3%y**2 + v3%z**2)
+     la = la/sqrt(v1%x**2 + v1%y**2 + v1%z**2)
+
+     ang = abs(la)
+
+  end if
+
+end function ang
+
 subroutine param_esf(r_med, num, r_fit, al, rough)
 
   real, parameter :: pi = 3.141592654
@@ -862,6 +1062,6 @@ subroutine param_esf(r_med, num, r_fit, al, rough)
   r_fit = 6*r_med*pi/sqrt(real(num-1))
 
   al = (num-1)*100/(4*pi*r_med*r_med)
-  al = exp(0.4984*rough*log(al) - 1.06016110229/rough) 
+  al = exp(0.4984*rough*log(al) - 1.06016110229/rough)
 
 end subroutine param_esf
