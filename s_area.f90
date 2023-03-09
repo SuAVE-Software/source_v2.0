@@ -625,7 +625,9 @@ program ar_grid
 12   format(a6, i5.1, a5, a5, a1, i4.1, a4, 3f8.3)
 
      lines = lines + 1
-     
+
+     if ((atom.eq.'TER  ')) cycle
+      
      if ((atom.eq.'ATOM  '))then
         
         if(ierr > 0) then
