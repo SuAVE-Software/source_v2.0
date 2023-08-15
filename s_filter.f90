@@ -328,10 +328,10 @@ program fourier
      !===================================
      ! calculando a transformada
      
-     dw = (2*pi/dt)/(3*n_index) !utilizando 3 vezes mais pontos que na dimensão temporal
+     dw = (2*pi/dt)/(n_index) !utilizando 3 vezes mais pontos que na dimensão temporal
 
      !$OMP parallel do 
-     do i=1, 3*n_index 
+     do i=1, n_index 
 
         w = -pi/dt + (i-1)*dw ! com isso w vai de -2pi/dt até 2pi/dt
         
@@ -350,7 +350,7 @@ program fourier
      end do
      !$OMP end parallel do 
      
-     do i=1, 3*n_index
+     do i=1, n_index
         
         w = -pi/dt + (i-1)*dw
 
@@ -371,7 +371,7 @@ program fourier
      
      !==inserindo FILTROS =========================
      !$OMP parallel do
-     do i=1, 3*n_index
+     do i=1, n_index
         
         if (sqrt(re(i)*re(i) + im(i)*im(i))<=low) then
            
@@ -407,7 +407,7 @@ program fourier
         ref(j) = 0
         imf(j) = 0
         
-        do i=1, 3*n_index 
+        do i=1, n_index 
            
            w = -pi/dt + (i-1)*dw ! com isso w vai de -2pi/dt até 2pi/dt
 
@@ -422,7 +422,7 @@ program fourier
      do j=1, n_index 
         
         t = inicial + (j-1)*dt
-        write(3, *, iostat=ierr) t, sinal(ref(j))*sqrt(ref(j)*ref(j) + imf(j)*imf(j))/(3*n_index) 
+        write(3, *, iostat=ierr) t, sinal(ref(j))*sqrt(ref(j)*ref(j) + imf(j)*imf(j))/(n_index) 
         
         if(ierr>0) then
            
