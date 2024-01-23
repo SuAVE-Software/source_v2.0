@@ -56,7 +56,7 @@
    
  -> `gfortran installed`
 
- -> `library libquadmath installed 
+ -> `library libquadmath installed` 
 
  ----------------------------------
 
@@ -68,9 +68,9 @@
     -> From GitHub web Page (https://github.com/SuAVE-Software/source) 
        clone the repository through the following commmand:
 
-       ```bash
+```bash
        git clone https://github.com/SuAVE-Software/source.git
-       ```
+```
 
     -> Dowload the compiled version from SuAVE Web Page 
        (https://www.biomatsite.net/suave-software)
