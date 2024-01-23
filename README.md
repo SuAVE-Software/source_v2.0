@@ -1,32 +1,32 @@
-            .--.--.                   ,---,                      ,---,. 
-           /  /    '.                '  .' \            ,---.  ,'  .' | 
-          |  :  /`. /          ,--, /  ;    '.         /__./|,---.'   | 
-          ;  |  |--`         ,'_ /|:  :       \   ,---.;  ; ||   |   .' 
-          |  :  ;_      .--. |  | ::  |   /\   \ /___/ \  | |:   :  |-, 
-           \  \    `. ,'_ /| :  . ||  :  ' ;.   :\   ;  \ ' |:   |  ;/| 
-            `----.   \|  ' | |  . .|  |  ;/  \   \\   \  \: ||   :   .' 
-            __ \  \  ||  | ' |  | |'  :  | \  \ ,' ;   \  ' .|   |  |-, 
-           /  /`--'  /:  | : ;  ; ||  |  '  '--'    \   \   ''   :  ;/| 
-          '--'.     / '  :  `--'   \  :  :           \   `  ;|   |    \ 
-            `--'---'  :  ,      .-./  | ,'            :   \ ||   :   .' 
-                       `--`----'   `--''               '---: |   | ,'   
-                                                             `----'    
-         
-                               ** VERSION 2.0.0 **
- 
-                          Santos, D. E. S.; Soares, T. A.
- 
-"             akjhdaksjfksjdhfsd"
+"           .--.--.                   ,---,                      ,---,. "
+"          /  /    '.                '  .' \            ,---.  ,'  .' | "
+"         |  :  /`. /          ,--, /  ;    '.         /__./|,---.'   | "
+"         ;  |  |--`         ,'_ /|:  :       \   ,---.;  ; ||   |   .' "
+"         |  :  ;_      .--. |  | ::  |   /\   \ /___/ \  | |:   :  |-, "
+"          \  \    `. ,'_ /| :  . ||  :  ' ;.   :\   ;  \ ' |:   |  ;/| "
+"           `----.   \|  ' | |  . .|  |  ;/  \   \\   \  \: ||   :   .' "
+"           __ \  \  ||  | ' |  | |'  :  | \  \ ,' ;   \  ' .|   |  |-, "
+"          /  /`--'  /:  | : ;  ; ||  |  '  '--'    \   \   ''   :  ;/| "
+"         '--'.     / '  :  `--'   \  :  :           \   `  ;|   |    \ "
+"           `--'---'  :  ,      .-./  | ,'            :   \ ||   :   .' "
+"                      `--`----'   `--''               '---: |   | ,'   "
+"                                                            `----'    "
+"       " 
+"                              ** VERSION 2.0.0 **"
+" "
+"                          Santos, D. E. S.; Soares, T. A."
+" 
+             
  ## CITATION: 
 
- **Surface Assessment via Grid Evaluation (SuAVE) for Every Surface Curvature and Cavity 
+ Surface Assessment via Grid Evaluation (SuAVE) for Every Surface Curvature and Cavity 
  Shape. (2022) Denys E. S. Santos, Kaline Coutinho, Thereza A. Soares. J. Chem. Inf. Model.,
- v. 62, p. 4690–4701.**
+ v. 62, p. 4690–4701.
 
 
- **SuAVE: A Tool for Analyzing Curvature-Dependent Properties in Chemical Interfaces
+ SuAVE: A Tool for Analyzing Curvature-Dependent Properties in Chemical Interfaces
  (2020) Denys E. S. Santos, Frederico J. S. Pontes, Roberto D. Lins, Kaline Coutinho, 
- Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484.**
+ Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484.
 
 
  ## DESCRIPTION: 
@@ -49,7 +49,6 @@
  it is maintained by a single developer. If you experience code issues, we kindly 
  request you to contact us at `e-mail: suave.biomat@gmail.com`
 
- ---------------------------------
 
  Prerequisites for installation:
  
@@ -59,7 +58,6 @@
 
  -> `library libquadmath installed` 
 
- ----------------------------------
 
  In order to install the programs and enjoy your analysis time, please follow the steps 
  below:
@@ -86,7 +84,6 @@
  
  ->> Enter the directory where you have downloaded the code
 
-
 ```bash
    cd ~/PATH_TO_SRC/
 ```
@@ -95,10 +92,10 @@
      content to update the `PATH` where you want to place the compiled source, and also
      the `FCFLAGS` to adapt it to your needs.
 
-    
-   `FCFLAGS = -O2 (DEFAULT)`
-   `INSTALL_PATH = /usr/local/suave (DEFAULT)`
-
+```bash
+   FCFLAGS = -O2 (DEFAULT)
+   INSTALL_PATH = /usr/local/suave (DEFAULT)
+```
 
    (The use of flags `-O2` or `-O3` is well accepted by this compiler and the code. It will be 
    helpful for extracting the best performance of SuAVE)
@@ -111,32 +108,28 @@
    make
 ```
 
-
 ```bash
    sudo make install
 ```
 
-
  ->> Insert the following directives in the .bash_profile file:
 
-   `export SUAVE=/usr/local/suave`
-   `export PATH=$SUAVE:$PATH`
+```bash
+   export SUAVE=/usr/local/suave
+   export PATH=$SUAVE:$PATH
+```
 
  ->> Update the bash
-
 
 ```bash
    source .bash_profile
 ```
 
-
    or
-
 
 ```bash
    source .bashrc
 ```
-
 
  ->> Have fun with your analysis !
 
