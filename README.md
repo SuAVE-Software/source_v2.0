@@ -16,7 +16,7 @@
  
                           Santos, D. E. S.; Soares, T. A.
  
-             "akjhdaksjfksjdhfsd"
+"             akjhdaksjfksjdhfsd"
  ## CITATION: 
 
  **Surface Assessment via Grid Evaluation (SuAVE) for Every Surface Curvature and Cavity 
@@ -96,11 +96,11 @@
      the `FCFLAGS` to adapt it to your needs.
 
     
-   FCFLAGS = -O2 (DEFAULT)
-   INSTALL_PATH = /usr/local/suave (DEFAULT)
+   `FCFLAGS = -O2 (DEFAULT)`
+   `INSTALL_PATH = /usr/local/suave (DEFAULT)`
 
 
-   (The use of flags -O2 or -O3 is well accepted by this compiler and the code. It will be 
+   (The use of flags `-O2` or `-O3` is well accepted by this compiler and the code. It will be 
    helpful for extracting the best performance of SuAVE)
    (SuAVE version 2.0.0 is also able to use `OpenMP parallelization`. To do so, the user has to 
    insert the flag `-fopenmp on FCFLAGS directive`)
@@ -119,8 +119,8 @@
 
  ->> Insert the following directives in the .bash_profile file:
 
-   export SUAVE=/usr/local/suave
-   export PATH=$SUAVE:$PATH
+   `export SUAVE=/usr/local/suave`
+   `export PATH=$SUAVE:$PATH`
 
  ->> Update the bash
 
