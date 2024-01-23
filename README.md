@@ -1,24 +1,7 @@
+# SuAVE 2.0.0
+## DESCRIPTION: 
 
-"                              ** VERSION 2.0.0 **"
-" "
-"                          Santos, D. E. S.; Soares, T. A."
-" 
-             
- ## CITATION: 
-
- Surface Assessment via Grid Evaluation (SuAVE) for Every Surface Curvature and Cavity 
- Shape. (2022) Denys E. S. Santos, Kaline Coutinho, Thereza A. Soares. J. Chem. Inf. Model.,
- v. 62, p. 4690–4701.
-
-
- SuAVE: A Tool for Analyzing Curvature-Dependent Properties in Chemical Interfaces
- (2020) Denys E. S. Santos, Frederico J. S. Pontes, Roberto D. Lins, Kaline Coutinho, 
- Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484.
-
-
- ## DESCRIPTION: 
-
- The `surface assessment via grid evaluation (SuAVE)` software was developed to account 
+ The `Surface Assessment Via grid Evaluation (SuAVE)` software was developed to account 
  for the effect of curvature in the calculations of structural properties of chemical 
  interfaces regardless of the chemical composition, asymmetry, and level of atom coarseness. 
  It employs differential geometry techniques, enabling the representation of chemical 
@@ -28,7 +11,17 @@
  `Denys E. S. Santos` wrote the code and conceived the algorithm and mathematical formalism. 
  `Thereza A. Soares` conceived the idea and supervised code development, and `Kaline Coutinho`
  revised the code and provided expertise with the equations and discussion.  
+ 
+ ## CITATION: 
 
+ Surface Assessment via Grid Evaluation (SuAVE) for Every Surface Curvature and Cavity 
+ Shape. (2022) Denys E. S. Santos, Kaline Coutinho, Thereza A. Soares. J. Chem. Inf. Model.,
+ v. 62, p. 4690–4701. [![DOI](https://zenodo.org/badge/71169051.svg)](https://doi.org/10.1021/acs.jcim.2c00673) 
+
+
+ SuAVE: A Tool for Analyzing Curvature-Dependent Properties in Chemical Interfaces
+ (2020) Denys E. S. Santos, Frederico J. S. Pontes, Roberto D. Lins, Kaline Coutinho, 
+ Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484. [![DOI](https://zenodo.org/badge/71169051.svg)](https://doi.org/10.1021/acs.jcim.9b00569)
 
  ## INSTALLATION:
 
@@ -49,9 +42,10 @@
  In order to install the programs and enjoy your analysis time, please follow the steps 
  below:
 
+
  **1- Download the code:**
 
--> From GitHub web Page (https://github.com/SuAVE-Software/source) 
+-> From [GitHub web Page](https://github.com/SuAVE-Software/source) 
    clone the repository through the following commmand:
 
 
@@ -60,36 +54,43 @@
 ```
 
 
--> Dowload the compiled version from SuAVE Web Page 
-   (https://www.biomatsite.net/suave-software)
+-> Dowload the compiled version from [SuAVE Web Page](https://www.biomatsite.net/suave-software)
+
 
  **2- Compile the source code:**
 
  If you downloaded the compiled version you just need to insert the files on a 
  convenient path in order to be run. If you downloaded the source code, please compile
  it by the use of any `FORTRAN` compiler and the `MakeFile`. 
+
  
  ->> Enter the directory where you have downloaded the code
+
 
 ```bash
    cd ~/PATH_TO_SRC/
 ```
 
+
  ->> Edit makefile in order to proceed with the installation process. Edit `INSTALL_PATH`
      content to update the `PATH` where you want to place the compiled source, and also
      the `FCFLAGS` to adapt it to your needs.
+
 
 ```bash
    FCFLAGS = -O2 (DEFAULT)
    INSTALL_PATH = /usr/local/suave (DEFAULT)
 ```
 
+
    (The use of flags `-O2` or `-O3` is well accepted by this compiler and the code. It will be 
    helpful for extracting the best performance of SuAVE)
    (SuAVE version 2.0.0 is also able to use `OpenMP parallelization`. To do so, the user has to 
    insert the flag `-fopenmp on FCFLAGS directive`)
+
  
  ->> Once with the makefile updated, run make!
+
 
 ```bash
    make
@@ -99,24 +100,31 @@
    sudo make install
 ```
 
+
  ->> Insert the following directives in the .bash_profile file:
+
 
 ```bash
    export SUAVE=/usr/local/suave
    export PATH=$SUAVE:$PATH
 ```
 
+
  ->> Update the bash
+
 
 ```bash
    source .bash_profile
 ```
 
+
    or
+
 
 ```bash
    source .bashrc
 ```
+
 
  ->> Have fun with your analysis !
 
