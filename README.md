@@ -16,7 +16,7 @@
  
                           Santos, D. E. S.; Soares, T. A.
  
-
+             "akjhdaksjfksjdhfsd"
  ## CITATION: 
 
  **Surface Assessment via Grid Evaluation (SuAVE) for Every Surface Curvature and Cavity 
@@ -69,9 +69,11 @@
 -> From GitHub web Page (https://github.com/SuAVE-Software/source) 
    clone the repository through the following commmand:
 
+
 ```bash
    git clone https://github.com/SuAVE-Software/source.git
 ```
+
 
 -> Dowload the compiled version from SuAVE Web Page 
    (https://www.biomatsite.net/suave-software)
@@ -84,6 +86,7 @@
  
  ->> Enter the directory where you have downloaded the code
 
+
 ```bash
    cd ~/PATH_TO_SRC/
 ```
@@ -91,14 +94,16 @@
  ->> Edit makefile in order to proceed with the installation process. Edit `INSTALL_PATH`
      content to update the `PATH` where you want to place the compiled source, and also
      the `FCFLAGS` to adapt it to your needs.
-    
-     FCFLAGS = -O2 (DEFAULT)
-     INSTALL_PATH = /usr/local/suave (DEFAULT)
 
-     (The use of flags -O2 or -O3 is well accepted by this compiler and the code. It will be 
-     helpful for extracting the best performance of SuAVE)
-     (SuAVE version 2.0.0 is also able to use `OpenMP parallelization`. To do so, the user has to 
-     insert the flag `-fopenmp on FCFLAGS directive`)
+    
+   FCFLAGS = -O2 (DEFAULT)
+   INSTALL_PATH = /usr/local/suave (DEFAULT)
+
+
+   (The use of flags -O2 or -O3 is well accepted by this compiler and the code. It will be 
+   helpful for extracting the best performance of SuAVE)
+   (SuAVE version 2.0.0 is also able to use `OpenMP parallelization`. To do so, the user has to 
+   insert the flag `-fopenmp on FCFLAGS directive`)
  
  ->> Once with the makefile updated, run make!
 
@@ -106,9 +111,11 @@
    make
 ```
 
+
 ```bash
    sudo make install
 ```
+
 
  ->> Insert the following directives in the .bash_profile file:
 
@@ -117,15 +124,19 @@
 
  ->> Update the bash
 
+
 ```bash
    source .bash_profile
 ```
 
+
    or
+
 
 ```bash
    source .bashrc
 ```
+
 
  ->> Have fun with your analysis !
 
