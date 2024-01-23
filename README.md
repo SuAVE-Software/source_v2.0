@@ -174,5 +174,5 @@
  `-help`            prints HELP information and quits
 
 
- For more information as to the usage of each code, please use -help flag, or see the Tutorial on SuAVE
- Web page (`https://www.biomatsite.net/suave-software`) 
+ For more information as to the usage of each code, please use -help flag, or see the Tutorial on [SuAVE
+ Web page](https://www.biomatsite.net/suave-software) 
