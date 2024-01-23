@@ -23,6 +23,7 @@
  Shape. (2022) Denys E. S. Santos, Kaline Coutinho, Thereza A. Soares. J. Chem. Inf. Model.,
  v. 62, p. 4690–4701.**
 
+
  **SuAVE: A Tool for Analyzing Curvature-Dependent Properties in Chemical Interfaces
  (2020) Denys E. S. Santos, Frederico J. S. Pontes, Roberto D. Lins, Kaline Coutinho, 
  Thereza A. Soares. J. Chem. Inf. Model., v. 60(2), p. 473-484.**
@@ -65,15 +66,15 @@
 
  **1- Download the code:**
 
-    -> From GitHub web Page (https://github.com/SuAVE-Software/source) 
-       clone the repository through the following commmand:
+-> From GitHub web Page (https://github.com/SuAVE-Software/source) 
+   clone the repository through the following commmand:
 
 ```bash
-       git clone https://github.com/SuAVE-Software/source.git
+   git clone https://github.com/SuAVE-Software/source.git
 ```
 
-    -> Dowload the compiled version from SuAVE Web Page 
-       (https://www.biomatsite.net/suave-software)
+-> Dowload the compiled version from SuAVE Web Page 
+   (https://www.biomatsite.net/suave-software)
 
  **2- Compile the source code:**
 
@@ -83,9 +84,9 @@
  
  ->> Enter the directory where you have downloaded the code
 
-     ```bash
-     cd ~/PATH_TO_SRC/
-     ```
+```bash
+   cd ~/PATH_TO_SRC/
+```
 
  ->> Edit makefile in order to proceed with the installation process. Edit `INSTALL_PATH`
      content to update the `PATH` where you want to place the compiled source, and also
@@ -101,30 +102,30 @@
  
  ->> Once with the makefile updated, run make!
 
-     ```bash
-     make
-     ```
+```bash
+   make
+```
 
-     ```bash
-     sudo make install
-     ```
+```bash
+   sudo make install
+```
 
  ->> Insert the following directives in the .bash_profile file:
 
-     export SUAVE=/usr/local/suave
-     export PATH=$SUAVE:$PATH
+   export SUAVE=/usr/local/suave
+   export PATH=$SUAVE:$PATH
 
  ->> Update the bash
 
-     ```bash
-     source .bash_profile
-     ```
+```bash
+   source .bash_profile
+```
 
-     or
+   or
 
-     ```bash
-     $ source .bashrc
-     ```
+```bash
+   source .bashrc
+```
 
  ->> Have fun with your analysis !
 
