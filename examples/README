@@ -1,1 +1,43 @@
-teste file
+List of commands for the calculation of membrane structural properties
+
+Area per lipid
+s_area_c -in membrane.pdb -ind1 mem1.ndx -ind2 mem2.ndx -bin 100 -lipid 1 -rmsd -grid
+s_spher_s -in vesicle.pdb -ind1 ves1.ndx -ind2 ves2.ndx -bin 100 -lipid 1 -grid -rmsd
+
+Thickness and volume per lipid
+s_thick_c -in membrane.pdb -ind1 mem1.ndx -ind2 mem2.ndx -bin 100 -lipid 1 -rmsd -grid
+s_shell_s -in vesicle.pdb -ind1 ves1.ndx -ind2 ves2.ndx -bin 100 -lipid 1 -grid -rmsd
+
+Order Parameter
+s_order_c -in membrane.pdb -ind1 mem1.ndx -bin 100 -rmsd -grid
+s_bend_s -in vesicle.pdb -ind1 ves1.ndx  -bin 100 -lipid 1 -grid -rmsd
+
+Surface Topography
+s_topog_c -in membrane.pdb -ind1 mem1.ndx -ind2 mem2.ndx -bin 100 -rmsd -grid
+
+Density Profile (for water -> ow.ndx)
+s_dens_c -in membrane.pdb -ind1 mem1.ndx -ind2 mem2.ndx -dens ow-mem.ndx -bin 100 -rmsd -grid
+s_densph_s -in vesicle.pdb -ind1 ves1.ndx -ind2 ves2.ndx -dens ow-ves.ndx-bin 100 -rmsd -grid
+
+Making Grid files
+s_grid_c -in membrane.pdb -ind1 mem1.ndx -bin 100 -rmsd
+s_gridshp_s -in vesicle.pdb -ind1 ves1.ndx -bin 100 -rmsd
+
+Gaussian and mean curvatures calculations
+s_gauss_c -in membrane.pdb -ind1 mem1.ndx -bin 100 -grid -rmsd
+
+Index production
+s_index -in membrane.pdb (to create an index from pdb)
+s_index -gromacs index.ndx (to convert gromacs indexes into SuAVE index)
+
+Fast Fourier Transform of output files
+s_filter -in file.xvg 
+
+Statistical analysis of output files
+s_stat -in file.xvg
+
+Moment of Inertia assessment
+s_inertia_s -in vesicle.pdb -ind1 ves1.ndx -bin 100 -grid -rmsd
+
+Counting molecules inside a closed surface
+s_count -in vesicle.pdb -ind1 ves1.ndx -dens ow-ves.ndx -bin 100 -const 1.0 -rmsd 
