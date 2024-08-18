@@ -75,7 +75,7 @@
 
 
 ```bash
-   ./install.sh
+   ./install_lib.sh
 ```
 
 
