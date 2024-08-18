@@ -1,87 +1,26 @@
-module separa
+program suave_index
 
-  implicit none
+  use types
+  use variables
+  use funcproc
 
-  character(len=5), parameter :: version = "2.0.0"
+  call startup(outer, bin, p_grid, coord, ind, ind2, rmsd, map, ind3, &
+     l_coarse, begin, end, skip, lipid, rough, slices, inside, range, &
+     n_grid, bin_out, fr_in, fr_end, n_skip, n_lipid, get, div, 's_index   ', version)
+
+  !Leitura do PDB  
+12 format(a6, i5.1, a5, a5, a1, i4.1, a4, 3f8.3)
+
+  !escrita do PDB com XPM
+13 format(a6, i5.1, a5, a5, a1, i4.1, a4, 3f8.3, f5.1)
   
-  type vet1
-
-     character(len=30) :: atom, resid, ident, code
-     real ::  x, y, z
-     integer :: n_atom, n_resid
-     
-  end type vet1
-
-end module separa
-
-
-program separa_indice
-
-  use separa
-
-  logical :: ex, res, sph, igual, join, gro, bound, help, back
-  
-  integer :: i, j, ierr, res_i, res_j, id(500)
-  integer :: n_index, i_atom, n_sph, aux2, n_index2
-  integer, dimension(15)  :: ax
-  
-  real :: cent_x, cent_y, cent_z, rho, dist_z, aux3
-  
-  character(len=30) :: coord, cond, index, sai, atom, resid, gro_file
-  character(len=30), dimension(30) :: get
-  character(len=30) :: atomid(500,500), residue(500), aux
-  
-  type(vet1) :: buff 
-  type(vet1), dimension(1000000) :: store, store2, sphstore
-
-                                                              
-                                                              
-  write(*, *) "  .--.--.                   ,---,                      ,---,. "
-  write(*, *) " /  /    '.                '  .' \            ,---.  ,'  .' | "
-  write(*, *) "|  :  /`. /          ,--, /  ;    '.         /__./|,---.'   | "
-  write(*, *) ";  |  |--`         ,'_ /|:  :       \   ,---.;  ; ||   |   .' "
-  write(*, *) "|  :  ;_      .--. |  | ::  |   /\   \ /___/ \  | |:   :  |-, "
-  write(*, *) " \  \    `. ,'_ /| :  . ||  :  ' ;.   :\   ;  \ ' |:   |  ;/| "
-  write(*, *) "  `----.   \|  ' | |  . .|  |  ;/  \   \\   \  \: ||   :   .' "
-  write(*, *) "  __ \  \  ||  | ' |  | |'  :  | \  \ ,' ;   \  ' .|   |  |-, "
-  write(*, *) " /  /`--'  /:  | : ;  ; ||  |  '  '--'    \   \   ''   :  ;/| "
-  write(*, *) "'--'.     / '  :  `--'   \  :  :           \   `  ;|   |    \ "
-  write(*, *) "  `--'---'  :  ,      .-./  | ,'            :   \ ||   :   .' "
-  write(*, *) "             `--`----'   `--''               '---: |   | ,'   "
-  write(*, *) "                                                   `----'     "
-  write(*, *) ""
-  write(*, *) ""
-  write(*, *) "                       ** s_index ** " 
-  write(*, *) "" 
-  write(*, *) "                   ** VERSION ", version, " **"
-  write(*, *) ""
-  write(*, *) "               Santos, D. E. S; Soares, T. A."
-  write(*, *) ""
-  write(*, *) "Please cite "
-  write(*, *)
-  write(*, *) "Santos, D. E. S.; Coutinho, K.; Soares, T. A. (2022) Surface "
-  write(*, *) "Assessment Grid Evaluation (SuAVE) for Every Surface Curvature"
-  write(*, *) "and Cavity Shape. Journal of Chemical Information and Modeling,"
-  write(*, *) "v. 62, p. 4690–4701"
-  write(*, *)
-  write(*, *) "Santos, D. E. S.; Pontes, J. F. S.; Lins, R. D.; Coutinho, K.; "
-  write(*, *) "Soares, T. A. (2020) SuAVE: A Tool for Analyzing Curvature-Dependent"
-  write(*, *) "Properties in Chemical Interfaces. Journal of Chemical Information "
-  write(*, *) "and Modeling, v. 60, p. 473-484."
-  
-  !
-  ! pegando os arquivos de entrada
-  !
-
   back = .false.
-  coord = 'miss'
   cond = 'miss'
   res = .false.
   sph = .false.
   join = .false.
   gro = .false.
   bound = .false.
-  help = .false.
   
   do i=1, 30
 
@@ -90,12 +29,6 @@ program separa_indice
   end do
 
   do i=1, 30
-
-     if (get(i)=='-in')then
-
-        coord = get(i+1)
-
-     end if
 
      if (get(i)=='-residue')then
 
@@ -127,81 +60,14 @@ program separa_indice
         bound = .true.
 
      end if
-     
-     if (get(i)=='-help') then
-        
-        help = .true.
-        
-     end if
 
   end do
 
-  !HELP begins ===============================================================
-  if (help) then
-
-     write(*, *) ""
-     write(*, *) "" 
-     write(*, *) "s_index creates the input file containing indexes assigned to" 
-     write(*, *) "the atoms, which will be used to define the surface/interface." 
-     write(*, *) "The user should select atoms distributed along the "
-     write(*, *) "full surface, and preferentially, with low atomic "
-     write(*, *) "fluctuation along time."
-     write(*, *) " "
-     write(*, *) "Usage: s_index -in file.pdb"
-     write(*, *) ""
-     write(*, *) "file.pdb ---- atomic coordinates in PDB format"
-     write(*, *) ""
-     write(*, *) "Options: "
-     write(*, *) ""
-     write(*, *) "-residue         selects a full residue to fit the grid or" 
-     write(*, *) "to be used for the calculation of the density profile."  
-     write(*, *) "Otherwise the s_index will ask for specific atoms."
-     write(*, *) ""
-     write(*, *) "-sphere          defines compact systems (micelles," 
-     write(*, *) "vesicles, etc.)"
-     write(*, *) ""
-     write(*, *) "-join            joins all indexes into a single file."
-     write(*, *) "Creates the index files for the calculation of the" 
-     write(*, *) "density profile. This option must be used to calculate" 
-     write(*, *) "monolayers as opposed to bilayers."
-     write(*, *) ""
-     write(*, *) "-gromacs         converts density index files from GROMACS" 
-     write(*, *) "format to SuAVE format"
-     write(*, *) ""
-     write(*, *) "-bound           defines the position of placement of a" 
-     write(*, *) "divisor plane between the two leaflets of a bilayer. If the" 
-     write(*, *) "flag is not used, s_index will assume the boundary at the" 
-     write(*, *) "average distance between the two surfaces defined by the" 
-     write(*, *) "atoms listed in the index file."
-     write(*, *) ""
-     write(*, *) "-help            prints HELP information and quits."
-     stop
-
-  end if
-  !HELP end =================================================================
-
-  if ((coord=='miss').and.(.not.gro))then
-
-     write(*, *)
-     write(*, *)'PDB file is missing'
-     write(*, *)
-     stop
-
-  end if
 
   if (.not.gro)then 
      
-     open(1, file=coord, status='old', iostat=ierr)
+     call abre_trj(1, coord)
      
-     if(ierr /=0) then
-        
-        write(*, *)
-        write(*, *) 'Unable to open file ', coord
-        write(*, *)
-        stop
-        
-     endif
-
   end if
   
   !===============GROMACS to SuAVE================================================
@@ -225,27 +91,9 @@ program separa_indice
         stop
         
      endif
+
+     call abre('single_ind', 2, 'ndx', back)
      
-     inquire(file='single_ind.ndx', exist=ex)
-     
-     if (ex) then
-
-        call execute_command_line("mv single_ind.ndx single_ind_p.ndx")
-        back = .true.
-
-     end if
-
-     open(2, file='single_ind.ndx', status='new', iostat=ierr)
-
-     if(ierr /= 0) then
-
-        write(*, *)
-        write(*, *) 'Unable to open file single_ind.ndx'
-        write(*, *)
-        stop
-
-     end if
-
 4    format(i10)
      
      ierr = 0
@@ -310,8 +158,8 @@ program separa_indice
           buff%resid, buff%ident, buff%n_resid, buff%code, buff%x, &
           buff%y, buff%z
 
-12   format(a4, i7.1, a5, a5, a1, i4.1, a4, 3f8.3)
-
+     if (atom.eq.'TER   ') cycle
+     
      if (atom.eq.'ATOM  ') then
         
         if(ierr > 0) then
@@ -410,7 +258,6 @@ program separa_indice
 
   end if
 
-
   rewind(1)
 
   i_atom = 0
@@ -424,9 +271,6 @@ program separa_indice
   dist_z = 0
   
 ! Leitura do arquivo .pdb==============================================================
-
-  write(*, *)
-  write(*, *)'Processing ..........'
 
   do while (ierr >= 0)
 
@@ -516,7 +360,7 @@ program separa_indice
         
         do i=1, n_sph-1
            
-           store(n_index) = sphstore(i)
+           ind_store(n_index) = sphstore(i)
            n_index = n_index + 1
            
         end do
@@ -527,14 +371,14 @@ program separa_indice
            
            if (sphstore(i)%z>dist_z) then
               
-              store(n_index) = sphstore(i)
+              ind_store(n_index) = sphstore(i)
               n_index = n_index + 1
               
            end if
            
            if (sphstore(i)%z<dist_z) then
               
-              store2(n_index2) = sphstore(i)
+              ind_store2(n_index2) = sphstore(i)
               n_index2 = n_index2 + 1
               
            end if
@@ -588,21 +432,21 @@ program separa_indice
 
            if (join) then
 
-              store(n_index) = sphstore(i)
+              ind_store(n_index) = sphstore(i)
               n_index = n_index + 1
               
            else
               
               if (rho>dist_z) then
                  
-                 store(n_index) = sphstore(i)
+                 ind_store(n_index) = sphstore(i)
                  n_index = n_index + 1
                  
               end if
               
               if (rho<dist_z) then
                  
-                 store2(n_index2) = sphstore(i)
+                 ind_store2(n_index2) = sphstore(i)
                  n_index2 = n_index2 + 1
                  
               end if
@@ -613,21 +457,21 @@ program separa_indice
 
            if ((join).and.(sphstore(i)%atom.eq.index)) then
 
-              store(n_index) = sphstore(i)
+              ind_store(n_index) = sphstore(i)
               n_index = n_index + 1
 
            else
               
               if ((sphstore(i)%atom.eq.index).and.(rho>dist_z)) then
                  
-                 store(n_index) = sphstore(i)
+                 ind_store(n_index) = sphstore(i)
                  n_index = n_index + 1
                  
               end if
               
               if ((sphstore(i)%atom.eq.index).and.(rho<dist_z)) then
                  
-                 store2(n_index2) = sphstore(i)
+                 ind_store2(n_index2) = sphstore(i)
                  n_index2 = n_index2 + 1
                  
               end if
@@ -644,83 +488,28 @@ program separa_indice
 
   if (join) then
 
-     inquire(file='single_ind.ndx', exist=ex)
-     
-     if (ex) then
-        
-        call execute_command_line("mv single_ind.ndx single_ind_p.ndx")
-        back = .true.
-        
-     end if
-     
-     open(2, file='single_ind.ndx', status='new', iostat=ierr)
-     
-     if(ierr /= 0) then
-        
-        write(*, *)
-        write(*, *) 'Unable to open file single_ind.ndx'
-        write(*, *)
-        stop
-        
-     end if
+     call abre('single_ind', 2, 'ndx', back)     
 
      do i=1, n_index-1
         
-        write(2, 4) store(i)%n_atom
+        write(2, 4) ind_store(i)%n_atom
         
      end do
      
   else
-     
-     inquire(file='ind2.ndx', exist=ex)
-     
-     if (ex) then
-        
-        call execute_command_line("mv ind2.ndx ind2_p.ndx")
-        back = .true.
-        
-     end if
-  
-     open(2, file='ind2.ndx', status='new', iostat=ierr)
-     
-     if(ierr /= 0) then
-        
-        write(*, *)
-        write(*, *) 'Unable to open file ind2.ndx'
-        write(*, *)
-        stop
-        
-     end if
 
-     inquire(file='ind1.ndx', exist=ex)
-     
-     if (ex) then
-        
-        call execute_command_line("mv ind1.ndx ind1_p.ndx")
-        back = .true.
-        
-     end if
-     
-     open(3, file='ind1.ndx', status='new', iostat=ierr)
-     
-     if(ierr /= 0) then
-        
-        write(*, *)
-        write(*, *) 'Unable to open file ind1.ndx'
-        write(*, *)
-        stop
-        
-     end if
-     
+     call abre('ind2      ', 2, 'ndx', back)
+     call abre('ind1      ', 3, 'ndx', back)
+          
      do i=1, n_index-1
         
-        write(3, 4) store(i)%n_atom
+        write(3, 4) ind_store(i)%n_atom
         
      end do
      
      do i=1, n_index2-1
         
-        write(2, 4) store2(i)%n_atom
+        write(2, 4) ind_store2(i)%n_atom
         
      end do
 
@@ -742,29 +531,29 @@ program separa_indice
      
   end if
      
-end program separa_indice
+end program suave_index
 
 subroutine imprime(vetor, indice)
-
-    character(len=30), intent(in) :: vetor(500)
-    integer, intent(in) :: indice
-
-5   format(i4, a10)
-    
-    do i=1, int((indice+4)/5)
-       
-       do j=1, 5
-          
-          if ((i-1)*5+j<=indice)then
-             
-             write(*, 5, advance='no') (i-1)*5+j, vetor((i-1)*5+j)
-             
-          end if
-          
-       end do
-       
-       write(*,*)
-       
-    end do
-    
+  
+  character(len=30), intent(in) :: vetor(500)
+  integer, intent(in) :: indice
+  
+5 format(i4, a10)
+  
+  do i=1, int((indice+4)/5)
+     
+     do j=1, 5
+        
+        if ((i-1)*5+j<=indice)then
+           
+           write(*, 5, advance='no') (i-1)*5+j, vetor((i-1)*5+j)
+           
+        end if
+        
+     end do
+     
+     write(*,*)
+     
+  end do
+  
 end subroutine imprime

@@ -71,6 +71,13 @@
    cd ~/PATH_TO_SRC/
 ```
 
+ ->> Install XTC library!
+
+
+```bash
+   ./install.sh
+```
+
 
  ->> Edit makefile in order to proceed with the installation process. Edit `INSTALL_PATH`
      content to update the `PATH` where you want to place the compiled source, and also
@@ -88,7 +95,7 @@
    (SuAVE version 2.0.0 is also able to use `OpenMP parallelization`. To do so, the user has to 
    insert the flag `-fopenmp on FCFLAGS directive`)
 
- 
+
  ->> Once with the makefile updated, run make!
 
 
