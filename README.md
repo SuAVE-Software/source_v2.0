@@ -71,10 +71,11 @@
    cd ~/PATH_TO_SRC/
 ```
 
- ->> Install XTC library!
+ ->> Uncompress XTC library and install it!
 
 
 ```bash
+    unzip library.zip.
    ./install_lib.sh
 ```
 
