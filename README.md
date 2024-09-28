@@ -77,6 +77,7 @@
 ```bash
     unzip library.zip.
    ./install_lib.sh
+    sudo ldconfig
 ```
 
 
