@@ -71,13 +71,11 @@
    cd ~/PATH_TO_SRC/
 ```
 
- ->> Uncompress XTC library and install it!
+ ->> Install XTC library!
 
 
 ```bash
-    unzip library.zip.
-   ./install_lib.sh
-    sudo ldconfig
+   ./install.sh
 ```
 
 

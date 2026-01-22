@@ -470,7 +470,8 @@ contains
     use types
     real, parameter :: pi = 3.141592654
     integer i, j, n_grid, bini
-    real :: aver, aver2, r_xpm(n_grid, n_grid), la, aux2, hist(100)
+    real :: aver, aver2, r_xpm(n_grid, n_grid), la, aux2
+    double precision :: hist(1000)
     type(vet2) :: v1, v2, v3
     type(vet2), dimension(1001,1001) :: grid
     
@@ -525,7 +526,8 @@ contains
     use types
     real, parameter :: pi = 3.141592654
     integer i, j, lim_i, lim_j, bini
-    real :: aver, aver2, r_xpm1(lim_i-1, lim_j-1), la, aux2, hist(1000)
+    real :: aver, aver2, r_xpm1(lim_i-1, lim_j-1), la, aux2
+    double precision :: hist(1000)
     real :: dth, dph
     type(vet2) :: v1, v2, v3
     type(vet2), dimension(1001,1001) :: grid3
@@ -1592,6 +1594,73 @@ contains
   end function ang
   !====================================================================
 
+  subroutine calc_running_aver(aver, aver2, desv, dados, n, init)
+    
+    double precision, intent(inout) :: aver, aver2, desv
+    integer :: n, i, init
+    real, dimension(10000000) :: dados
+    
+    aver = 0
+    aver2 = 0
+    
+    do i=init-n+1, init
+       
+       aver = aver + dados(i)
+       aver2 = aver2 + dados(i)*dados(i)
+       
+    end do
+    
+    aver = aver/n
+    aver2 = aver2/n
+    desv = aver2-aver*aver
+    
+  end subroutine calc_running_aver
+  !====================================================================
+
+
+  subroutine calc_stat_IQR(n_index, hist, del, minf, quart1, quart3)
+    
+    integer :: n_index, i, class_q1, class_q3
+    
+    double precision :: del, hist(1000), sum
+    double precision :: acum25, acum75, quart1, quart3, minf
+    
+    !Calculando mediana, moda, quartil e decil=====
+    sum = 0
+    class_q1 = 1
+    class_q3 = 1
+    
+    do i=1, 1000
+       
+       sum = sum + hist(i)*del*n_index
+       
+       if (sum<n_index/4)then
+          
+          class_q1 = i+1
+          acum25 = sum
+          
+       end if
+       
+       if (sum<3*n_index/4)then
+          
+          class_q3 = i+1
+          acum75 = sum
+          
+       end if
+       
+    end do
+    
+    !primeiro Quartil para dados tabulados =
+    quart1 = (((class_q1-100)*del+minf)-del/2)
+    quart1 = quart1 + (n_index/4 - acum25)/(hist(class_q1)*n_index)
+    
+    !terceiro Quartil para dados tabulados =
+    quart3 = (((class_q3-100)*del+minf)-del/2)
+    quart3 = quart3 + (3*n_index/4 - acum75)/(hist(class_q3)*n_index)
+    
+  end subroutine calc_stat_IQR
+  !====================================================================
+  
   subroutine calc_stat_aver(aver, aver2, desv, skew, kurt, st_mom, n_index, func)
 
     double precision :: aver, aver2, desv, skew, kurt, st_mom
@@ -1614,8 +1683,8 @@ contains
     write(*, *)
     write(*, '(a45)')"****************** SUMMARY ******************"
     write(*, '(a45)')"*                                           *"
-    write(*, '(a13, f10.3, a22)')"* Average  = ", aver, "                   *"
-    write(*, '(a13, f10.3, a22)')"* S. dev.  = ", desv, "                   *"
+    write(*, '(a13, es13.4, a19)')"* Average  = ", aver, "                *"
+    write(*, '(a13, es13.4, a19)')"* S. dev.  = ", desv, "                *"
     
     skew = 0
     kurt = 0
@@ -1633,9 +1702,13 @@ contains
   subroutine do_histogram(n_index, hist, minf, desv, aver, aux, del, func, n_file)
 
     real, parameter :: pi = 3.141592654
-    integer :: i, n_index, bini, n_file
-    double precision :: hist(1000), minf, desv, aver, aux, del
     real, dimension(10000000) ::func
+    
+    integer :: i, n_index, bini, n_file, class_q1, class_q3, class_d1, class_d9
+
+    double precision :: hist(1000), minf, desv, aver, aux, del
+    double precision :: quart1, quart3, decil1, decil9
+
     
     !criando histograma ===========================
     do i=1, n_index
@@ -1663,7 +1736,7 @@ contains
        write(n_file, *) (i-100)*del+minf, aux
        
     end do
-        
+    
   end subroutine do_histogram
   !====================================================================
 
@@ -1671,7 +1744,7 @@ contains
     
     integer :: n_index, i, class_modal
     integer :: class_med, class_q1, class_q3, class_d1, class_d9
-    
+      
     double precision :: aux, aver, desv, kurt, delta1, delta2
     double precision :: del, hist(1000), sum, acum, moda, mediana
     double precision :: acum25, acum75, quart1, quart3, acum10, acum90
@@ -1726,9 +1799,9 @@ contains
           acum90 = sum
           
        end if
-       
-    end do
-    
+
+    end do   
+
     !moda de Czuber para dados tabulados====
     delta1 = hist(class_modal) - hist(class_modal-1)
     delta2 = hist(class_modal) - hist(class_modal+1)
@@ -1754,24 +1827,24 @@ contains
     !nono Decil para dados tabulados========
     decil9 = (((class_d9-100)*del+minf)-del/2)
     decil9 = decil9 + (9*n_index/10 - acum90)/(hist(class_d9)*n_index)
+        
+    write(2, *) '&'
+    write(2, '(es13.4, es13.4)') quart1, hist(class_q1)
+    write(2, *) '&'
+    write(2, '(es13.4, es13.4)') quart3, hist(class_q3)
+    write(2, *) '&'
+    write(2, '(es13.4, es13.4)') decil1, hist(class_d1)
+    write(2, *) '&'
+    write(2, '(es13.4, es13.4)') decil9, hist(class_d9)
     
-    write(2, *) '&'
-    write(2, *) quart1, hist(class_q1)
-    write(2, *) '&'
-    write(2, *) quart3, hist(class_q3)
-    write(2, *) '&'
-    write(2, *) decil1, hist(class_d1)
-    write(2, *) '&'
-    write(2, *) decil9, hist(class_d9)
     
-    
-    write(*, '(a13, f10.3, a22)')"* Mode     = ", moda, "                   *"
-    write(*, '(a13, f10.3, a22)')"* Median   = ", mediana, "                   *"
+    write(*, '(a13, es13.4, a19)')"* Mode     = ", moda, "                *"
+    write(*, '(a13, es13.4, a19)')"* Median   = ", mediana, "                *"
     write(*, '(a45)') "*                                           *"
-    write(*, '(a20, f10.3, a15)')"* Lower Quartile  = ", quart1, "          *" 
-    write(*, '(a20, f10.3, a15)')"* Upper Quartile  = ", quart3, "          *"  
-    write(*, '(a20, f10.3, a15)')"* Lower Decile    = ", decil1, "          *"
-    write(*, '(a20, f10.3, a15)')"* Upper Decile    = ", decil9, "          *"
+    write(*, '(a20, es13.4, a12)')"* Lower Quartile  = ", quart1, "       *" 
+    write(*, '(a20, es13.4, a12)')"* Upper Quartile  = ", quart3, "       *"  
+    write(*, '(a20, es13.4, a12)')"* Lower Decile    = ", decil1, "       *"
+    write(*, '(a20, es13.4, a12)')"* Upper Decile    = ", decil9, "       *"
     write(*, '(a45)') "*                                           *"
     write(*, '(a30, f10.3, a5)')"* Coefficient of Variation  = ", desv/aver, "    *"
     write(*, '(a45)')"*===================================        *"

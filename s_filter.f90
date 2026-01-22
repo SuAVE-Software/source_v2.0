@@ -4,7 +4,7 @@ program suave_filter
   
   ! Permanecendo com as variaveis para facilitar =======
   real, parameter :: pi = 3.141592654
-  character(len=5), parameter :: version = "2.0.0"
+  character(len=5), parameter :: version = "2.24.07"
   
   logical :: ex, help, hfilter, lfilter, sfilter, back
   

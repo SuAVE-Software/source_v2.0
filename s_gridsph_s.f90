@@ -320,33 +320,33 @@ program suave_gridsph
                   
         !fim da escrita da trajetoria======================================
 
-        n_index = 1
-        i_atom = 0
-        num = 1
-
-        if (ierr<0) then
-
-           cent_x = center%x
-           cent_y = center%y
-           cent_z = center%z
-
-        end if
+     end if !======((frame<fr_in-1).and.(frame>fr_end+1))
         
-        center%x = cent_x
-        center%y = cent_y
-        center%z = cent_z
-        cent_x = 0
-        cent_y = 0
-        cent_z = 0
-        x_min = 1000
-        y_min = 1000
-        z_min = 1000
-        x_max = 0
-        y_max = 0
-        z_max = 0
-              
-     end if !======((frame<fr_in-1).and.(frame>fr_end+1)) 
-          
+     n_index = 1
+     i_atom = 0
+     num = 1
+     
+     if (ierr<0) then
+        
+        cent_x = center%x
+        cent_y = center%y
+        cent_z = center%z
+        
+     end if
+     
+     center%x = cent_x
+     center%y = cent_y
+     center%z = cent_z
+     cent_x = 0
+     cent_y = 0
+     cent_z = 0
+     x_min = 1000
+     y_min = 1000
+     z_min = 1000
+     x_max = 0
+     y_max = 0
+     z_max = 0
+     
      !====garante que fr_end sempre seja maior que frame ===
      !====caso essa variável não tenha sido fixada==========
 

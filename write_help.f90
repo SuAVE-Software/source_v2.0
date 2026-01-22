@@ -388,6 +388,23 @@ subroutine write_help(name)
         write(*, *) "-help            prints HELP information and quits"
         stop
 
+     case('comp')
+
+        write(*, *) ""
+        write(*, *) ""
+        write(*, *) "s_comp performs a statistical analysis on the area per lipid"
+        write(*, *) "measurements representing the curved and the projected area"
+        write(*, *) "being able to estimate area compressibility and bending modulus"
+        write(*, *) ""
+        write(*, *) "Usage: s_comp -true file.xvg -proj file2.xvg -size N -temp  "
+        write(*, *) ""
+        write(*, *) "file.xvg ---- contains a SuAVE output for total membrane area"
+        write(*, *) ""
+        write(*, *) "Options: "
+        write(*, *) ""
+        write(*, *) "-help            prints HELP information and quits"
+        stop
+        
      case('access')
 
         write(*, *) ""

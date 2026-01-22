@@ -215,7 +215,7 @@ subroutine startup(outer, bin, p_grid, coord, ind, ind2, rmsd, map, ind3, &
   
   ! Realizando consideracoes ==============================
   
-  if (coord=='miss')then
+  if ((coord=='miss').and.(trim(name)/='s_index'))then
      
      write(*, *)
      write(*, *)'PDB file is missing'

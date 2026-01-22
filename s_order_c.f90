@@ -74,7 +74,7 @@ program suave_order
 
   do k=1, 100
 
-     hist(k) = 0
+     histd(k) = 0
 
   end do
 
@@ -295,7 +295,7 @@ program suave_order
         
         ! Cálculo do ângulo de inclinação
         
-        call calc_order(n_grid, grid, r_xpm1, aver, aver2, hist)
+        call calc_order(n_grid, grid, r_xpm1, aver, aver2, histd)
         
         desv = sqrt(aver2 - aver*aver)
         minv = min(aver-2*desv, minv)
@@ -335,16 +335,16 @@ program suave_order
         
         !! ******* Fim do cálculo
 
-        gx = x_min
-        gy = y_min
-        n_index = 1
-        i_atom = 0
-        x_min = 1000
-        y_min = 1000
-        x_max = 0
-        y_max = 0
-        
      end if !======((frame<fr_in-1).and.(frame>fr_end+1))
+     
+     gx = x_min
+     gy = y_min
+     n_index = 1
+     i_atom = 0
+     x_min = 1000
+     y_min = 1000
+     x_max = 0
+     y_max = 0
      
      !====garante que fr_end sempre seja maior que frame ===
      !====caso essa variável não tenha sido fixada==========
@@ -432,10 +432,17 @@ program suave_order
   write(4, *) '@    xaxis  label "Angles [\So\N]"'
   write(4, *) '@    yaxis  label "%"'
 
+  norm = 0
+  do i=1, 100
+
+     norm =  norm + histd(i)/10000 ! divisão para impedir overflow
+
+  end do
+  
   do i=1, 100
      
-     graph = hist(i)
-     graph = graph/(tot_frame*1*n_grid*n_grid)
+     graph = histd(i)
+     graph = graph/(norm*10000)
      
      write(4, *) i-1, graph*100
      

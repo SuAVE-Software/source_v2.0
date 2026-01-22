@@ -358,20 +358,20 @@ program suave_gauss
 
         !! ******* Fim do cálculo
 
-        Lx = x_max - x_min
-        Ly = y_max - y_min
-        gx = x_min
-        gy = y_min
-        n_index = 1
-        num = 1
-        i_atom = 0
-        x_min = 1000
-        y_min = 1000
-        x_max = 0
-        y_max = 0
-
      end if !======((frame<fr_in-1).and.(frame>fr_end+1))
-
+        
+     Lx = x_max - x_min
+     Ly = y_max - y_min
+     gx = x_min
+     gy = y_min
+     n_index = 1
+     num = 1
+     i_atom = 0
+     x_min = 1000
+     y_min = 1000
+     x_max = 0
+     y_max = 0
+     
      !====garante que fr_end sempre seja maior que frame ===
      !====caso essa variável não tenha sido fixada==========
      if (.not.end) then

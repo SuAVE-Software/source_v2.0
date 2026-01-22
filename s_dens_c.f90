@@ -540,7 +540,7 @@ program densidade
         
      end if !======((frame<fr_in-1).and.(frame>fr_end+1))
      
-     tot_dens = a_dens
+     if (a_dens>1) tot_dens = a_dens
      gz = z_max-z_min
      n_index = 1
      i_atom = 0
