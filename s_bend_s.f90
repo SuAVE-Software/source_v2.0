@@ -72,7 +72,7 @@ program suave_bend
 
   do k=1, 200
 
-     hist(k) = 0
+     histd(k) = 0
 
   end do
 
@@ -309,7 +309,7 @@ program suave_bend
         ! Cálculo do ângulo de inclinação =================================
         
         call sphe2cart((n_grid-int(n_grid/2))+1, n_grid+1, 0.0, 0.0, 0.0, grid, grid3)
-        call calc_order_sph((n_grid-int(n_grid/2))+1, n_grid+1, dph, dth, grid3, r_xpm1, aver, aver2, hist)
+        call calc_order_sph((n_grid-int(n_grid/2))+1, n_grid+1, dph, dth, grid3, r_xpm1, aver, aver2, histd)
         
         desv = sqrt(aver2 - aver*aver)
         minv = min(aver-2*desv, minv)
@@ -349,30 +349,30 @@ program suave_bend
            
         end if
 
-        n_index = 1
-        i_atom = 0
-        num = 1
-        num2 = 1
-
-        if (ierr<0) then
-     
-           cent_x = center%x
-           cent_y = center%y
-           cent_z = center%z
-
-        end if
-     
-        center%x = cent_x
-        center%y = cent_y
-        center%z = cent_z
-        cent_x = 0 
-        cent_y = 0
-        cent_z = 0
-
-        ! Fim do calculo do RMSD===================================
+     end if !======((frame<fr_in-1).and.(frame>fr_end+1))
         
-     end if !======((frame<fr_in-1).and.(frame>fr_end+1)) 
+     n_index = 1
+     i_atom = 0
+     num = 1
+     num2 = 1
      
+     if (ierr<0) then
+        
+        cent_x = center%x
+        cent_y = center%y
+        cent_z = center%z
+        
+     end if
+     
+     center%x = cent_x
+     center%y = cent_y
+     center%z = cent_z
+     cent_x = 0 
+     cent_y = 0
+     cent_z = 0
+     
+     ! Fim do calculo do RMSD===================================
+        
      !====garante que fr_end sempre seja maior que frame ===
      !====caso essa variável não tenha sido fixada==========
 
@@ -459,10 +459,17 @@ program suave_bend
   write(4, *) '@    xaxis  label "Angles [\So\N]"'
   write(4, *) '@    yaxis  label "%"'
 
+  norm = 0
   do i=1, 100
 
-     graph = hist(i)
-     graph = graph/(tot_frame*1*n_grid*(n_grid - int(n_grid/2)))
+     norm  = norm + histd(i)/10000 ! divisão para impedir overflow
+
+  end do
+  
+  do i=1, 100
+
+     graph = histd(i)
+     graph = graph/(norm*10000)
 
      write(4, *) i-1, graph*100
 

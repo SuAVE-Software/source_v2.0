@@ -34,10 +34,13 @@ s_stat: s_stat.f90
 s_filter: s_filter.f90
 	gfortran -O2 types.f90 variables.F90 funcproc.f90 write_help.f90 startup.f90 $^ -o $@
 
+s_comp: s_comp.f90
+	gfortran -DSTAT -O2 types.f90 variables.F90 funcproc.f90 write_help.f90 startup.f90 $^ -o $@
+
 clean:
-	@rm -f *.mod 
+	@rm -f *.mod $(OBJ_ALL)
 
 install:
-	@mv $(OBJ_ALL)  $(INSTALL_PATH)
+	@cp $(OBJ_ALL)  $(INSTALL_PATH)
 	@echo "SuAVE Installed !"
 	@echo "Enjoy it !"
