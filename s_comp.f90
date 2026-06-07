@@ -4,6 +4,9 @@ program comp
   use variables
   use funcproc
 
+  integer :: N_sample, n_rand, locate, n_Ka, n_kc
+  double precision, dimension(10000000) :: Ka_true, Ka_proj, kc, kc2
+  
   call startup(outer, bin, p_grid, coord, ind, ind2, rmsd, map, ind3, &
      l_coarse, begin, end, skip, lipid, rough, slices, inside, range, &
      n_grid, bin_out, fr_in, fr_end, n_skip, n_lipid, get, div, 's_comp    ', version)
@@ -11,6 +14,7 @@ program comp
   back = .false.
   signal2 = 'miss'
   signal = 'miss'
+  ac_time = 0
   n = 1
   temp = 300 ! DEFAULT
   
@@ -45,6 +49,12 @@ program comp
         read(get(i+1), *, iostat=ierr) temp
         
      end if
+
+     if (get(i)=='-ac')then
+        
+	read(get(i+1), *, iostat=ierr) ac_time
+ 
+     end if
      
   end do
 
@@ -58,7 +68,15 @@ program comp
 
   end if
 
-
+  if (ac_time==0)then
+     
+     write(*, *)
+     write(*, *)'You must provide the autocorr. time [in frames]'
+     write(*, *)
+     stop
+     
+  end if
+  
   call abre_trj(1, signal)
 
   if (signal2=='miss')then
@@ -80,8 +98,8 @@ program comp
   write(2, '(a9)', advance='no') '#s_stat  '
   write(2, *) (trim(get(i)),"  ", i=1, 20)
   write(2, *) '@    title "Area Compressibility"'
-  write(2, *) '@    xaxis  label "Frame"'
-  write(2, *) '@    yaxis  label "KA [N/m]"'
+  write(2, *) '@    xaxis  label "Moving Block Bootstrap Sample"'
+  write(2, *) '@    yaxis  label "K\sA\N [N/m]"'
 
 
   call abre('kc        ', 4, 'xvg', back)
@@ -90,8 +108,8 @@ program comp
   write(4, '(a14)') '#Command Line:'
   write(4, '(a9)', advance='no') '#s_comp  '
   write(4, *) (trim(get(i)),"  ", i=1, 20)
-  write(4, *) '@    title "Area Compressibility"'
-  write(4, *) '@    xaxis  label "Sample"'
+  write(4, *) '@    title "Bending Modulus"'
+  write(4, *) '@    xaxis  label "Moving Block Bootstrap Sample"'
   write(4, *) '@    yaxis  label "kc [J]"'
   
   !=============================================================
@@ -148,32 +166,31 @@ program comp
   j = 0
   maxf = -100000
   minf = 100000
-
+  n_Ka = 0
+  n_kc = 0
+  
   do i=size, n_index
 
+     n_Ka = n_Ka + 1
      call calc_running_aver(aver, aver2, desv2, func, size, i)
-     Ka_true = aver*kb*temp/(desv2*1.0e-18) ! valor em N/m
+     Ka_true(n_Ka) = aver*kb*temp/(desv2*1.0e-18) ! valor em N/m
 
      call calc_running_aver(aver, aver2, desv2, func2, size, i)
-     Ka_proj = aver*kb*temp/(desv2*1.0e-18) ! valor em N/m
-          
-     write(2, *) i, Ka_true, Ka_proj
-
+     Ka_proj(n_Ka) = aver*kb*temp/(desv2*1.0e-18) ! valor em N/m
 
      A0 = aver*1E-18          ! corrigindo para m2
      
-     aux = 1/Ka_true - 1/Ka_proj
+     aux = 1/Ka_true(n_Ka) - 1/Ka_proj(n_Ka)
 
      !guardando os valores para avaliar o filtro e remoção de outliers
 
      if ((aux<0).and.(aux>-10000)) then
 
-        j = j + 1
-        kc = sqrt(-(A0*kb*temp)/(16.6*pi*pi*pi*aux)) ! valor em J
-        kc_v1(j) = kc
-
-        maxf = max(maxf, kc)
-        minf = min(minf, kc)
+        n_kc = n_kc + 1
+        kc(n_kc) = sqrt(-(A0*kb*temp)/(32*pi*pi*pi*aux)) ! valor em J
+        
+        maxf = max(maxf, kc(n_kc))
+        minf = min(minf, kc(n_kc))
            
      end if
      
@@ -186,30 +203,34 @@ program comp
 
   del = (maxf - minf)/100
 
-  do i=1, j
+  do i=1, n_kc
      
-     bini = nint((kc_v1(i)-minf)/del) + 100
-     hist(bini) = hist(bini) + 1/(j*del)
+     bini = nint((kc(i)-minf)/del) + 100
+     hist(bini) = hist(bini) + 1/(n_kc*del)
      
   end do
   
   !Calculando o IQR
-  call calc_stat_IQR(j, hist, del, minf, quart1, quart3)
+  call calc_stat_IQR(n_kc, hist, del, minf, quart1, quart3)
   IQR = quart3 - quart1
   
   k = 0
   
-  do i=1, j
+  do i=1, n_kc
 
-     if ((kc_v1(i) > quart1 - 1.5*IQR).and.(kc_v1(i) < quart3 + 1.5*IQR)) then
+     if ((kc(i) > quart1 - 1.5*IQR).and.(kc(i) < quart3 + 1.5*IQR)) then
 
         k = k + 1
-        kc_v2(k) = kc_v1(i)
-        write(4, *) k, kc_v2(k)
+        kc2(k) = kc(i)
         
      end if
 
   end do
+
+  n_kc = k ! atualizando o número de pontos em kc
+
+  call mbb(Ka_true, n_Ka, ac_time, int(1000*start/clock_rate), 2)
+  call mbb(kc2, n_kc, ac_time, int(1000*start/clock_rate), 4)
   
   !==================================
 

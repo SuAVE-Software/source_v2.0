@@ -8,7 +8,7 @@ module variables
 
 #ifdef INDEX
 
-  character(len=7), parameter :: version = "2.26.01"
+  character(len=7), parameter :: version = "2.26.06"
   logical :: ex, res, sph, igual, join, gro, bound, back
 
   integer :: i, j, ierr, res_i, res_j, id(500)
@@ -27,7 +27,7 @@ module variables
 #elif CART
 
   real, parameter :: pi = 3.141592654
-  character(len=7), parameter :: version = "2.26.01"
+  character(len=7), parameter :: version = "2.26.06"
 
   logical :: ex, bin, outer, p_grid, rmsd, l_coarse, begin, end, skip
   logical :: eval_skip, lipid, slices, inside, map, back, range, next_frame
@@ -58,7 +58,7 @@ module variables
 #elif SPHE
 
   real, parameter :: pi = 3.141592654
-  character(len=7), parameter :: version = "2.26.01"
+  character(len=7), parameter :: version = "2.26.06"
   
   logical :: ex, bin, p_grid, rmsd, l_coarse, begin, end, skip
   logical :: eval_skip, lipid, help, outer, back, range, slices, next_frame
@@ -94,24 +94,24 @@ module variables
 #elif STAT
 
   real, parameter :: pi = 3.141592654
-  character(len=7), parameter :: version = "2.26.01"
+  character(len=7), parameter :: version = "2.26.06"
   
-  logical :: ex, help, back
+  logical :: ex, help, back, l_acf, l_mbb
   
   character(len=30) :: get(20), signal, signal2
   
   integer :: n_index, i, j, ierr, bini, class_modal, temp, size
   integer :: class_med, class_q1, class_q3, class_d1, class_d9
-  integer :: start, finish, clock_rate, clock_max
+  integer :: start, finish, clock_rate, clock_max, ac_time
 
-  double precision :: aux_true, desv2, Ka_true, Ka_proj, kc
+  double precision :: aux_true, desv2
   double precision :: aux, aux2, aver, aver2, desv, kurt, delta1, delta2
   double precision :: del, hist(1000), sum, acum, moda, mediana, st_mom
   double precision :: acum25, acum75, quart1, quart3, acum10, acum90
   double precision :: decil1, decil9, skew, acf, maxf, minf
   double precision, parameter :: kb = 1.380649e-23
 
-  real, dimension(10000000) ::func, func2, kc_v1, kc_v2
+  double precision, dimension(10000000) ::func, func2
   
 #endif
   

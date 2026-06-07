@@ -3,13 +3,16 @@ program suave_stat
   use types
   use variables
   use funcproc
-
+  
   call startup(outer, bin, p_grid, coord, ind, ind2, rmsd, map, ind3, &
      l_coarse, begin, end, skip, lipid, rough, slices, inside, range, &
      n_grid, bin_out, fr_in, fr_end, n_skip, n_lipid, get, div, 's_stat    ', version)
 
   back = .false.
   signal = 'miss'
+  l_acf = .false.
+  l_mbb = .false.
+  ac_time = 0
   
   do i=1, 20
      
@@ -24,6 +27,19 @@ program suave_stat
         signal = get(i+1)
 
      end if
+
+     if (get(i)=='-acf')then
+
+        l_acf = .true.
+
+     end if
+
+     if (get(i)=='-mbb')then
+        
+        l_mbb = .true.
+        read(get(i+1), *, iostat=ierr) ac_time
+        
+     end if
      
   end do
 
@@ -36,6 +52,16 @@ program suave_stat
 
   end if
 
+  if ((l_mbb).and.(ac_time==0))then
+
+     write(*, *)
+     write(*, *)'You must provide the block size [in frames]'
+     write(*, *)'for the M. B. Bootstrap protocol'
+     write(*, *)
+     stop
+
+  end if
+  
   call abre_trj(1, signal)
 
   call abre('pdf       ', 2, 'xvg', back)
@@ -54,35 +80,50 @@ program suave_stat
   write(2, *) '@    s1 line linewidth 2.0'
   write(2, *) '@    s2 comment "pdf.xvg"'
   write(2, *) '@    s2 legend  "Lower Quartile"'
-  write(2, *) '@    s2 symbol 1'
-  write(2, *) '@    s2 symbol color 3'
-  write(2, *) '@    s2 symbol fill pattern 1'
+  write(2, *) '@    s2 line linewidth 2.5'
+  write(2, *) '@    s2 line color 3'
   write(2, *) '@    s3 comment "pdf.xvg"'
   write(2, *) '@    s3 legend  "Upper Quartile"'
-  write(2, *) '@    s3 symbol 1'
-  write(2, *) '@    s3 symbol color 4'
-  write(2, *) '@    s3 symbol fill pattern 1'
+  write(2, *) '@    s3 line linewidth 2.5'
+  write(2, *) '@    s3 line color 4'
   write(2, *) '@    s4 comment "pdf.xvg"'
   write(2, *) '@    s4 legend  "Lower Decile"'
-  write(2, *) '@    s4 symbol 1'
-  write(2, *) '@    s4 symbol color 5'
-  write(2, *) '@    s4 symbol fill pattern 1'
+  write(2, *) '@    s4 line linewidth 2.5'
+  write(2, *) '@    s4 line color 5'
   write(2, *) '@    s5 comment "pdf.xvg"'
   write(2, *) '@    s5 legend  "Upper Decile"'
-  write(2, *) '@    s5 symbol 1'
-  write(2, *) '@    s5 symbol color 6'
-  write(2, *) '@    s5 symbol fill pattern 1'
+  write(2, *) '@    s5 line linewidth 2.5'
+  write(2, *) '@    s5 line color 6'
 
-  call abre('acf       ', 3, 'xvg', back)  
+  if (l_acf) then
+     
+     call abre('acf       ', 3, 'xvg', back)  
+     
+     write(3, '(a7, a7)') "#SuAVE ", version
+     write(3, '(a14)') '#Command Line:'
+     write(3, '(a9)', advance='no') '#s_stat  '
+     write(3, *) (trim(get(i)),"  ", i=1, 20)
+     write(3, *) '@    title "Autocorrelation Function X Frame"'
+     write(3, *) '@    xaxis  label "Frame"'
+     write(3, *) '@    yaxis  label "ACF(frame)"'
 
-  write(3, '(a7, a7)') "#SuAVE ", version
-  write(3, '(a14)') '#Command Line:'
-  write(3, '(a9)', advance='no') '#s_stat  '
-  write(3, *) (trim(get(i)),"  ", i=1, 20)
-  write(3, *) '@    title "Autocorrelation Function X Frame"'
-  write(3, *) '@    xaxis  label "Frame"'
-  write(3, *) '@    yaxis  label "ACF(frame)"'
+  end if
 
+  if (l_mbb) then
+
+     call abre('mbb       ', 4, 'xvg', back)
+
+     write(4, '(a7, a7)') "#SuAVE ", version
+     write(4, '(a14)') '#Command Line:'
+     write(4, '(a9)', advance='no') '#s_stat  '
+     write(4, *) (trim(get(i)),"  ", i=1, 20)
+     write(4, *) '@    title "Moving Block Bootstrap"'
+     write(4, *) '@    xaxis  label "Moving Block Bootstrap Samples"'
+     write(4, *) '@    yaxis  label "Property"'
+
+  end if
+
+  
   !===================================
 
   do i=1, 10000000
@@ -128,6 +169,8 @@ program suave_stat
      stop
 
   end if
+
+  close(1)
   
   call system_clock(start, clock_rate, clock_max)
   
@@ -140,12 +183,15 @@ program suave_stat
   call calc_stat_aver(aver, aver2, desv, skew, kurt, st_mom, n_index, func)
   call do_histogram(n_index, hist, minf, desv, aver, aux, del, func, 2)
   call calc_stat_all(n_index, hist, del, minf, skew, kurt, aver, desv)  
-  call calc_acf(n_index, aver, desv, func)
 
+  if (l_acf) call calc_acf(n_index, aver, desv, func)
+  if (l_mbb) call mbb(func, n_index, ac_time, int(1000*start/clock_rate), 4)
+  
   call system_clock(finish, clock_rate, clock_max)
   
-  close(1)
   close(2)
+  close(3)
+  close(4)
 
   call ending(back, finish, start, clock_rate) ! Finaliza programa e mostra tempo de processamento
   

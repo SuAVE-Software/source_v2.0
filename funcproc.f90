@@ -1598,7 +1598,7 @@ contains
     
     double precision, intent(inout) :: aver, aver2, desv
     integer :: n, i, init
-    real, dimension(10000000) :: dados
+    double precision, dimension(10000000) :: dados
     
     aver = 0
     aver2 = 0
@@ -1665,7 +1665,7 @@ contains
 
     double precision :: aver, aver2, desv, skew, kurt, st_mom
     integer :: i, n_index
-    real, dimension(10000000) ::func
+    double precision, dimension(10000000) ::func
     
     aver = 0
     aver2 = 0
@@ -1702,7 +1702,7 @@ contains
   subroutine do_histogram(n_index, hist, minf, desv, aver, aux, del, func, n_file)
 
     real, parameter :: pi = 3.141592654
-    real, dimension(10000000) ::func
+    double precision, dimension(10000000) ::func
     
     integer :: i, n_index, bini, n_file, class_q1, class_q3, class_d1, class_d9
 
@@ -1780,7 +1780,7 @@ contains
        end if
        
        if (sum<3*n_index/4)then
-          
+       
           class_q3 = i+1
           acum75 = sum
           
@@ -1829,12 +1829,16 @@ contains
     decil9 = decil9 + (9*n_index/10 - acum90)/(hist(class_d9)*n_index)
         
     write(2, *) '&'
+    write(2, '(es13.4, es13.4)') quart1, 0.0
     write(2, '(es13.4, es13.4)') quart1, hist(class_q1)
     write(2, *) '&'
+    write(2, '(es13.4, es13.4)') quart3, 0.0
     write(2, '(es13.4, es13.4)') quart3, hist(class_q3)
     write(2, *) '&'
+    write(2, '(es13.4, es13.4)') decil1, 0.0
     write(2, '(es13.4, es13.4)') decil1, hist(class_d1)
     write(2, *) '&'
+    write(2, '(es13.4, es13.4)') decil9, 0.0
     write(2, '(es13.4, es13.4)') decil9, hist(class_d9)
     
     
@@ -1881,7 +1885,7 @@ contains
 
     integer :: i, j, n_index
     double precision :: acf, aver, desv
-    real, dimension(10000000) ::func
+    double precision, dimension(10000000) ::func
     
     write(*, *)
     write(*, *) "Calculating Autocorrelation Function ......"
@@ -2127,9 +2131,50 @@ contains
    end subroutine ordem
    !====================================================================
    
+   subroutine mbb (func, n_index, size, rand_seed, file)
 
-   
+     integer:: N_sample, i, n_index, size, j, n_rand, locate, file, rand_seed
+     double precision, dimension(10000000) :: func, func2
+     double precision :: aver, aver2, desv
+     
+     call srand(rand_seed)
+     
+     do i=1, 1000 ! número de reamostragens no MBB            
+        
+        N_sample = int(n_index/size) + 1 ! quantos pedaços precisamos para regerar o dado     
+        locate = 1 ! localização da escrita em func2              
+        
+        do j=1, N_sample
+           
+           n_rand = int(rand()*(n_index - size)) + 1 ! posição onde começar a copiar do func para func2       
+           
+           do k=locate, locate + size - 1
+              
+              func2(k) = func(n_rand)
+              n_rand = n_rand + 1
+              
+           end do
+           
+           locate = locate + size
+           
+        end do
 
+        !calculando a média ============
+        
+        aver = 0
+        
+        do j=1, n_index
+           
+           aver = aver + func2(j)/n_index
+           
+        end do
+                
+        write(file, *) i, aver
+        
+     end do
+     
+   end subroutine mbb
+   !====================================================================
 
 
  end module funcproc

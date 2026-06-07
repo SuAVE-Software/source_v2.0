@@ -35,9 +35,7 @@ subroutine startup(outer, bin, p_grid, coord, ind, ind2, rmsd, map, ind3, &
   write(*, *) "               ** VERSION ", version, " **"
   write(*, *) ""
   write(*, *) "            Santos, D. E. S.; Soares, T. A."
-  write(*, *) ""
-  write(*, *) "Colaborators: "
-  write(*, *) "Coutinho, K.        Caetano, D. L. Z"
+  write(*, *) "            Coutinho, K.; Caetano, D. L. Z"
   write(*, *) ""
   write(*, *) "Please cite "
   write(*, *)
